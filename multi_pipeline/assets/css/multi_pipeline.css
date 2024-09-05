@@ -1,0 +1,58 @@
+/* Caminho: public_html/modules/multi_pipeline/assets/css/multi_pipeline.css */
+/* Estilos para o m¨®dulo Multi Pipeline */
+
+.pipeline-container {
+    display: flex;
+    overflow-x: auto;
+    padding: 20px 0;
+}
+
+.pipeline-stage {
+    min-width: 250px;
+    margin-right: 20px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.pipeline-stage-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pipeline-stage-count {
+    background-color: #03a9f4;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+.pipeline-lead {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: move;
+}
+
+.pipeline-lead:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .pipeline-container {
+        flex-direction: column;
+    }
+
+    .pipeline-stage {
+        min-width: auto;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+}
