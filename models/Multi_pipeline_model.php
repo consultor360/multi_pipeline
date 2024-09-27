@@ -20,29 +20,22 @@ class Multi_pipeline_model extends App_Model
  * @param array $where Um array de condições WHERE adicionais (opcional).
  * @return array|object Um array de pipelines ou um objeto de pipeline se $id for fornecido.
  */
-public function get_pipelines($id = null, $where = [])
+public function get_pipelines($where = [], $limit = '', $start = '')
 {
-    if ($id !== null) {
-        // Verificar se o parâmetro $id é válido e seguro
-        if (!is_numeric($id) || $id < 1) {
-            throw new InvalidArgumentException('Invalid pipeline ID');
-        }
-    }
-
+    $this->db->select('*');
     $this->db->from(db_prefix() . 'multi_pipeline_pipelines');
-
-    if ($id !== null) {
-        $this->db->where('id', $id);
-        return $this->db->get()->row(); // Retorna um objeto para um único registro
-    } else {
-        // Verificar se o parâmetro $where é válido e seguro
-        if (!is_array($where) || empty($where)) {
-            $where = [];
-        }
-
-        $this->db->where($where); // Aplica filtros adicionais se fornecidos
-        return $this->db->get()->result_array(); // Retorna um array para múltiplos registros
+    
+    // Aplicar filtros adicionais se fornecidos
+    if (!empty($where)) {
+        $this->db->where($where);
     }
+    
+    // Aplicar limitação se fornecido
+    if ($limit !== '') {
+        $this->db->limit($limit, $start);
+    }
+    
+    return $this->db->get()->result_array(); // Retorna um array para múltiplos registros
 }
 
 /**
@@ -314,45 +307,56 @@ public function update_kanban_lead_stage($lead_id, $stage_id)
 
 public function get_stages($pipeline_id = null)
 {
+    $this->db->select('*');
     $this->db->from(db_prefix() . 'multi_pipeline_stages');
+    
     if ($pipeline_id !== null) {
         $this->db->where('pipeline_id', $pipeline_id);
     }
-    $this->db->order_by('pipeline_id', 'asc');
-    $this->db->order_by('order', 'asc');
+    
+    $this->db->order_by('order', 'ASC');
     return $this->db->get()->result_array();
 }
 
-public function get_leads($id = null, $where = [], $pipeline_id = null) {
-    $this->db->select('id, title, pipeline_id, stage_id, created_at');
-    $this->db->from(db_prefix() . 'leads'); // Certifique-se de que 'leads' é a tabela correta
-
-    if ($id !== null) {
-        // Verificar se o parâmetro $id é válido e seguro
-        if (!is_numeric($id) || $id < 1) {
-            throw new InvalidArgumentException('Invalid lead ID');
-        }
-        $this->db->where('id', $id);
-    } else {
-        // Verificar se o parâmetro $where é válido e seguro
-        if (!is_array($where) || empty($where)) {
-            $where = [];
-        }
+public function get_leads($where = [])
+{
+    $this->db->select('*');
+    $this->db->from(db_prefix() . 'leads');
+    
+    if (!empty($where)) {
         $this->db->where($where);
+    }
+    
+    return $this->db->get()->result_array();
+}
 
-        // Adicionar filtro de pipeline_id se fornecido
-        if ($pipeline_id !== null) {
-            $this->db->where('pipeline_id', $pipeline_id);
+public function get_leads_grouped()
+{
+    $this->db->select('tblleads.*, multi_pipeline_stages.name as stage_name, multi_pipeline_stages.color as stage_color, multi_pipeline_pipelines.id as pipeline_id, multi_pipeline_pipelines.name as pipeline_name');
+    $this->db->from('tblleads');
+    $this->db->join('multi_pipeline_stages', 'multi_pipeline_stages.id = tblleads.status', 'left');
+    $this->db->join('multi_pipeline_pipelines', 'multi_pipeline_pipelines.id = tblleads.pipeline_id', 'left');
+    $leads = $this->db->get()->result_array();
+
+    $grouped_leads = [];
+    foreach ($leads as $lead) {
+        $pipeline_id = $lead['pipeline_id'];
+        $stage_id = $lead['status'];
+        if (!isset($grouped_leads[$pipeline_id])) {
+            $grouped_leads[$pipeline_id] = [];
         }
+        if (!isset($grouped_leads[$pipeline_id][$stage_id])) {
+            $grouped_leads[$pipeline_id][$stage_id] = [
+                'stage_id' => $stage_id,
+                'stage_name' => $lead['stage_name'],
+                'stage_color' => $lead['stage_color'],
+                'leads' => []
+            ];
+        }
+        $grouped_leads[$pipeline_id][$stage_id]['leads'][] = $lead;
     }
 
-    $query = $this->db->get();
-
-    if ($id !== null) {
-        return $query->row(); // Retorna um objeto para um único registro
-    } else {
-        return $query->result_array(); // Retorna um array para múltiplos registros
-    }
+    return $grouped_leads;
 }
 
 }
