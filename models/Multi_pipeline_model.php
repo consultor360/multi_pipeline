@@ -23,7 +23,7 @@ class Multi_pipeline_model extends App_Model
 public function get_pipelines($where = [], $limit = '', $start = '')
 {
     $this->db->select('*');
-    $this->db->from(db_prefix() . 'multi_pipeline_pipelines');
+    $this->db->from('tblmulti_pipeline_pipelines');
     
     // Aplicar filtros adicionais se fornecidos
     if (!empty($where)) {
@@ -54,8 +54,8 @@ public function get_pipeline_stages($pipeline_id)
     }
 
     $this->db->select('mps.*')
-             ->from(db_prefix(). 'multi_pipeline_stages mps')
-             ->join(db_prefix(). 'multi_pipeline_pipelines mpp', 'mpp.id = mps.pipeline_id')
+             ->from('tblmulti_pipeline_stages mps')
+             ->join('tblmulti_pipeline_pipelines mpp', 'mpp.id = mps.pipeline_id')
              ->where('mpp.id', $pipeline_id);
 
     return $this->db->get()->result_array();
@@ -81,9 +81,9 @@ public function get_pipeline_leads($pipeline_id, $where = [])
     }
 
     $this->db->select('mpl.*, l.name, l.email, l.phonenumber, s.name as stage_name, l.pipeline_id')
-             ->from(db_prefix(). 'leads mpl')
-             ->join(db_prefix(). 'leads l', 'l.id = mpl.perfex_lead_id')
-             ->join(db_prefix(). 'multi_pipeline_stages s', 's.id = mpl.stage_id')
+             ->from('tblleads mpl')
+             ->join('tblleads l', 'l.id = mpl.perfex_lead_id')
+             ->join('tblmulti_pipeline_stages s', 's.id = mpl.stage_id')
              ->where('mpl.pipeline_id', $pipeline_id)
              ->where($where);
 
@@ -98,7 +98,7 @@ public function get_pipeline_leads($pipeline_id, $where = [])
      */
     public function add_pipeline($data)
     {
-        $this->db->insert(db_prefix() . 'multi_pipeline_pipelines', $data);
+        $this->db->insert('tblmulti_pipeline_pipelines', $data);
         return ($this->db->affected_rows() > 0) ? $this->db->insert_id() : false;
     }
 
@@ -112,7 +112,7 @@ public function get_pipeline_leads($pipeline_id, $where = [])
     public function update_pipeline($id, $data)
     {
         $this->db->where('id', $id);
-        $this->db->update(db_prefix() . 'pipelines', $data);
+        $this->db->update('tblmulti_pipeline_pipelines', $data);
         return $this->db->affected_rows() > 0;
     }
 
@@ -127,14 +127,14 @@ public function get_pipeline_leads($pipeline_id, $where = [])
         $this->db->trans_start();
         
         // Delete pipeline
-        $this->db->where('id', $id)->delete(db_prefix() . 'multi_pipeline_pipelines');
+        $this->db->where('id', $id)->delete('tblmulti_pipeline_pipelines');
         
         // Delete associated stages
-        $this->db->where('pipeline_id', $id)->delete(db_prefix() . 'multi_pipeline_stages');
+        $this->db->where('pipeline_id', $id)->delete('tblmulti_pipeline_stages');
         
         // Update associated leads
         $this->db->where('pipeline_id', $id)
-                 ->update(db_prefix() . 'multi_pipeline_leads', ['pipeline_id' => null, 'stage_id' => null]);
+                 ->update('tblleads', ['pipeline_id' => null, 'stage_id' => null]);
         
         $this->db->trans_complete();
         
@@ -151,7 +151,7 @@ public function get_pipeline_leads($pipeline_id, $where = [])
     public function update_lead_stage($lead_id, $stage_id)
     {
         $this->db->where('perfex_lead_id', $lead_id);
-        $this->db->update(db_prefix() . 'multi_pipeline_leads', ['stage_id' => $stage_id]);
+        $this->db->update('tblleads', ['stage_id' => $stage_id]);
         return $this->db->affected_rows() > 0;
     }
 
@@ -167,7 +167,7 @@ public function get_pipeline_leads($pipeline_id, $where = [])
         $first_stage = $this->db->where('pipeline_id', $pipeline_id)
                                 ->order_by('order', 'ASC')
                                 ->limit(1)
-                                ->get(db_prefix() . 'multi_pipeline_stages')
+                                ->get('tblmulti_pipeline_stages')
                                 ->row();
 
         if (!$first_stage) {
@@ -180,7 +180,7 @@ public function get_pipeline_leads($pipeline_id, $where = [])
             'stage_id' => $first_stage->id
         ];
 
-        $this->db->insert(db_prefix() . 'multi_pipeline_leads', $data);
+        $this->db->insert('tblleads', $data);
         return $this->db->affected_rows() > 0;
     }
 
@@ -193,8 +193,8 @@ public function get_pipeline_leads($pipeline_id, $where = [])
     public function get_lead_count_by_stage($pipeline_id)
 {
     $this->db->select('s.id, s.name, COUNT(mpl.perfex_lead_id) as lead_count')
-             ->from(db_prefix(). 'multi_pipeline_stages s')
-             ->join(db_prefix(). 'multi_pipeline_leads mpl', 's.id = mpl.stage_id', 'left')
+             ->from('tblmulti_pipeline_stages s')
+             ->join('tblmulti_pipeline_leads mpl', 's.id = mpl.stage_id', 'left')
              ->where('s.pipeline_id', $pipeline_id)
              ->group_by('s.id');
     
@@ -213,7 +213,7 @@ public function get_pipeline_leads($pipeline_id, $where = [])
         $first_stage = $this->db->where('pipeline_id', $new_pipeline_id)
                                 ->order_by('order', 'ASC')
                                 ->limit(1)
-                                ->get(db_prefix() . 'multi_pipeline_stages')
+                                ->get('tblmulti_pipeline_stages')
                                 ->row();
 
         if (!$first_stage) {
@@ -221,7 +221,7 @@ public function get_pipeline_leads($pipeline_id, $where = [])
         }
 
         $this->db->where('perfex_lead_id', $lead_id);
-        $this->db->update(db_prefix() . 'multi_pipeline_leads', [
+        $this->db->update('tblleads', [
             'pipeline_id' => $new_pipeline_id,
             'stage_id' => $first_stage->id
         ]);
@@ -231,7 +231,7 @@ public function get_pipeline_leads($pipeline_id, $where = [])
     
     public function get_first_pipeline()
     {
-        return $this->db->order_by('id', 'ASC')->limit(1)->get('multi_pipeline_pipelines')->row();
+        return $this->db->order_by('id', 'ASC')->limit(1)->get('tblmulti_pipeline_pipelines')->row();
     }
     
     public function create_triggers() {
@@ -308,7 +308,7 @@ public function update_kanban_lead_stage($lead_id, $stage_id)
 public function get_stages($pipeline_id = null)
 {
     $this->db->select('*');
-    $this->db->from(db_prefix() . 'multi_pipeline_stages');
+    $this->db->from('tblmulti_pipeline_stages');
     
     if ($pipeline_id !== null) {
         $this->db->where('pipeline_id', $pipeline_id);
@@ -321,7 +321,7 @@ public function get_stages($pipeline_id = null)
 public function get_leads($where = [])
 {
     $this->db->select('*');
-    $this->db->from(db_prefix() . 'leads');
+    $this->db->from('tblleads');
     
     if (!empty($where)) {
         $this->db->where($where);
@@ -332,16 +332,16 @@ public function get_leads($where = [])
 
 public function get_leads_grouped()
 {
-    $this->db->select('tblleads.*, multi_pipeline_stages.name as stage_name, multi_pipeline_stages.color as stage_color, multi_pipeline_pipelines.id as pipeline_id, multi_pipeline_pipelines.name as pipeline_name');
+    $this->db->select('tblleads.*, tblmulti_pipeline_stages.name as stage_name, tblmulti_pipeline_stages.color as stage_color, tblmulti_pipeline_pipelines.id as pipeline_id, tblmulti_pipeline_pipelines.name as pipeline_name');
     $this->db->from('tblleads');
-    $this->db->join('multi_pipeline_stages', 'multi_pipeline_stages.id = tblleads.status', 'left');
-    $this->db->join('multi_pipeline_pipelines', 'multi_pipeline_pipelines.id = tblleads.pipeline_id', 'left');
+    $this->db->join('tblmulti_pipeline_stages', 'tblmulti_pipeline_stages.id = tblleads.stage_id', 'left');
+    $this->db->join('tblmulti_pipeline_pipelines', 'tblmulti_pipeline_pipelines.id = tblleads.pipeline_id', 'left');
     $leads = $this->db->get()->result_array();
 
     $grouped_leads = [];
     foreach ($leads as $lead) {
         $pipeline_id = $lead['pipeline_id'];
-        $stage_id = $lead['status'];
+        $stage_id = $lead['stage_id'];
         if (!isset($grouped_leads[$pipeline_id])) {
             $grouped_leads[$pipeline_id] = [];
         }
