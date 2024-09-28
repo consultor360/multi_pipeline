@@ -133,6 +133,7 @@ class Multi_pipeline extends AdminController
 
             if ($this->form_validation->run() === TRUE) {
                 $data = $this->input->post();
+                $this->load->model('multi_pipeline_model');
                 $pipeline_id = $this->multi_pipeline_model->add_pipeline($data);
                 if ($pipeline_id) {
                     log_activity('New Pipeline Created [ID: ' . $pipeline_id . ', Name: ' . $data['name'] . ']');
@@ -231,6 +232,7 @@ public function view_pipeline($id = null)
             redirect(admin_url('multi_pipeline'));
         }
     }
+    $this->load->model('multi_pipeline_model');
 
     $data['pipeline'] = $this->multi_pipeline_model->get_pipeline($id);
     if (!$data['pipeline']) {
