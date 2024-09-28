@@ -315,4 +315,33 @@ public function add_modal($pipeline_id = null, $stage_id = null)
         $this->load->view('multi_pipeline/leads/add_modal', $data);
     }
     
+    public function add_lead()
+    {
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            // Processar e salvar os dados do lead
+            $lead_id = $this->leads_model->add($data);
+            if ($lead_id) {
+                echo json_encode(['success' => true, 'lead_id' => $lead_id]);
+            } else {
+                echo json_encode(['success' => false]);
+            }
+            return;
+        }
+
+        $data['pipelines'] = $this->multi_pipeline_model->get_pipelines();
+        $data['lead_statuses'] = $this->leads_model->get_status();
+        $data['lead_sources'] = $this->leads_model->get_source();
+        $data['staff'] = $this->staff_model->get('', ['active' => 1]);
+        $data['stages'] = $this->multi_pipeline_model->get_all_stages();
+
+        $this->load->view('leads/add_modal', $data);
+    }
+
+    public function get_stages_by_pipeline()
+    {
+        $pipeline_id = $this->input->post('pipeline_id');
+        $stages = $this->multi_pipeline_model->get_stages_by_pipeline($pipeline_id);
+        echo json_encode($stages);
+    }
 }
