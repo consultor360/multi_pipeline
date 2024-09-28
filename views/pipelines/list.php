@@ -37,9 +37,9 @@ $is_admin = is_admin();
                                     </ul>
                                 </div>
                                 <?php if(has_permission('leads','','create')){ ?>
-                                <a href="#" onclick="init_lead(); return false;" class="btn btn-info">
+                                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#addLeadModal">
                                     <i class="fa fa-plus"></i> <?php echo _l('new_lead'); ?>
-                                </a>
+                                </button>
                                 <?php } ?>
                             </div>
                         </div>
@@ -253,3 +253,4 @@ function sort_leads(sortBy) {
     }
 }
 </style>
+<?php $this->load->view('leads/add_modal'); ?>
