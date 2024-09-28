@@ -30,34 +30,45 @@ $is_admin = is_admin();
                             <div class="kan-ban-row">
                                 <div class="kan-ban-outer-container">
                                     <div class="kan-ban-inner-container">
-                                        <?php if (isset($leads[$pipeline['id']])) {
-                                            foreach ($leads[$pipeline['id']] as $stage) { ?>
-                                                <div class="kan-ban-col" data-col-stage-id="<?php echo e($stage['stage_id']); ?>" data-pipeline-id="<?php echo e($pipeline['id']); ?>" data-total-pages="<?php echo e(count($stage['leads'])); ?>" data-total="<?php echo e(count($stage['leads'])); ?>">
-                                                    <div class="panel panel_s">
-                                                        <?php
-                                                        $stage_color = '';
-                                                        if (!empty($stage['stage_color'])) {
-                                                            $stage_color = 'style="background:' . $stage['stage_color'] . ';border:1px solid ' . $stage['stage_color'] . '"';
-                                                        }
-                                                        ?>
-                                                        <div class="panel-heading tw-bg-neutral-700 tw-text-white" <?php echo $stage_color; ?> data-stage-id="<?php echo e($stage['stage_id']); ?>">
-                                                            <?php echo e($stage['stage_name']); ?>
-                                                        </div>
-                                                        <div class="kan-ban-content-wrapper">
-                                                            <div class="kan-ban-content">
-                                                                <ul class="stage leads-stage sortable" data-lead-stage-id="<?php echo e($stage['stage_id']); ?>">
-                                                                    <?php foreach ($stage['leads'] as $lead) { ?>
-                                                                        <?php $this->load->view('pipelines/kanban_card', ['lead' => $lead, 'stage' => $stage, 'pipeline' => $pipeline]); ?>
-                                                                    <?php } ?>
-                                                                </ul>
-                                                            </div>
+                                        <?php
+                                        // Obter todos os estágios para este pipeline
+                                        $pipeline_stages = array_filter($stages, function($stage) use ($pipeline) {
+                                            return $stage['pipeline_id'] == $pipeline['id'];
+                                        });
+
+                                        foreach ($pipeline_stages as $stage) {
+                                            $stage_leads = isset($leads[$pipeline['id']][$stage['id']]['leads']) ? $leads[$pipeline['id']][$stage['id']]['leads'] : [];
+                                            $total_leads = count($stage_leads);
+                                        ?>
+                                            <div class="kan-ban-col" data-col-stage-id="<?php echo e($stage['id']); ?>" data-pipeline-id="<?php echo e($pipeline['id']); ?>" data-total-pages="<?php echo e($total_leads); ?>" data-total="<?php echo e($total_leads); ?>">
+                                                <div class="panel panel_s">
+                                                    <?php
+                                                    $stage_color = '';
+                                                    if (!empty($stage['color'])) {
+                                                        $stage_color = 'style="background:' . $stage['color'] . ';border:1px solid ' . $stage['color'] . '"';
+                                                    }
+                                                    ?>
+                                                    <div class="panel-heading tw-bg-neutral-700 tw-text-white" <?php echo $stage_color; ?> data-stage-id="<?php echo e($stage['id']); ?>">
+                                                        <?php echo e($stage['name']); ?>
+                                                    </div>
+                                                    <div class="kan-ban-content-wrapper">
+                                                        <div class="kan-ban-content">
+                                                            <ul class="stage leads-stage sortable" data-lead-stage-id="<?php echo e($stage['id']); ?>">
+                                                                <?php
+                                                                if (!empty($stage_leads)) {
+                                                                    foreach ($stage_leads as $lead) {
+                                                                        $this->load->view('pipelines/kanban_card', ['lead' => $lead, 'stage' => $stage, 'pipeline' => $pipeline]);
+                                                                    }
+                                                                } else {
+                                                                    echo "<li class='text-center'>Nenhum lead neste estágio</li>";
+                                                                }
+                                                                ?>
+                                                            </ul>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            <?php }
-                                        } else {
-                                            echo "<p>Nenhum lead encontrado para este pipeline.</p>";
-                                        } ?>
+                                            </div>
+                                        <?php } ?>
                                     </div>
                                 </div>
                             </div>
