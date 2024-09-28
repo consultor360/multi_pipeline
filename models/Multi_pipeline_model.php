@@ -359,4 +359,20 @@ public function get_leads_grouped()
     return $grouped_leads;
 }
 
+public function get_all_stages()
+{
+    $this->db->select('tblmulti_pipeline_stages.*, tblmulti_pipelines.name as pipeline_name');
+    $this->db->join('tblmulti_pipelines', 'tblmulti_pipelines.id = tblmulti_pipeline_stages.pipeline_id');
+    return $this->db->get('tblmulti_pipeline_stages')->result_array();
+}
+
+public function get_stages_by_pipeline($pipeline_id)
+{
+    $this->db->select('id, name');
+    $this->db->from('tblmulti_pipeline_stages');
+    $this->db->where('pipeline_id', $pipeline_id);
+    $this->db->order_by('order', 'ASC');
+    return $this->db->get()->result_array();
+}
+
 }
