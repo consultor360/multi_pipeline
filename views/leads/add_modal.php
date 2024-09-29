@@ -39,13 +39,25 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="status">Status do Lead</label>
+                                <label for="status">Estagio do Lead</label>
                                 <select name="stage_id" id="status" class="form-control selectpicker" data-live-search="true" required>
                                     <?php foreach ($stages as $stage) { ?>
                                         <option value="<?php echo $stage['id']; ?>"><?php echo $stage['name']; ?></option>
                                     <?php } ?>
                                 </select>
                             </div>
+<!-- Status Padrão -->
+                            <div class="form-group">
+                                <label for="default_status_id">Status Padrão</label>
+                                <select name="status" id="default_status_id" class="form-control selectpicker" data-live-search="true" required>
+                                    <option value=""><?php echo _l('select_status'); ?></option>
+                                    <?php foreach ($statuses as $status) { ?>
+                                        <option value="<?php echo $status['id']; ?>"><?php echo $status['name']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+
+                    
                             <div class="form-group">
                                 <label for="source">Fonte</label>
                                 <select name="source" id="source" class="form-control selectpicker" data-live-search="true" required>
