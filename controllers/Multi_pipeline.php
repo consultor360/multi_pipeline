@@ -319,23 +319,28 @@ public function add_modal($pipeline_id = null, $stage_id = null)
     {
         if ($this->input->post()) {
             $data = $this->input->post();
-            // Processar e salvar os dados do lead
-            $lead_id = $this->leads_model->add($data);
+
+            // Validar e processar os dados conforme necessário
+
+            // Salvar o lead
+            $lead_id = $this->Multi_pipeline_model->add_lead($data);
+
             if ($lead_id) {
-                echo json_encode(['success' => true, 'lead_id' => $lead_id]);
+                echo json_encode(['success' => true, 'message' => 'Lead adicionado com sucesso!']);
             } else {
-                echo json_encode(['success' => false]);
+                echo json_encode(['success' => false, 'message' => 'Erro ao adicionar lead.']);
             }
             return;
         }
 
-        $data['pipelines'] = $this->multi_pipeline_model->get_pipelines();
-        $data['lead_statuses'] = $this->leads_model->get_status();
-        $data['lead_sources'] = $this->leads_model->get_source();
-        $data['staff'] = $this->staff_model->get('', ['active' => 1]);
-        $data['stages'] = $this->multi_pipeline_model->get_all_stages();
+        // Carregar dados necessários para a view
+        $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines();
+        $data['stages'] = $this->Multi_pipeline_model->get_stages();
+        $data['statuses'] = $this->Multi_pipeline_model->get_all_statuses();
+        $data['sources'] = $this->Leads_model->get_sources(); // Função para obter fontes
+        $data['staff'] = $this->Staff_model->get(); // Função para obter staff
 
-        $this->load->view('leads/add_modal', $data);
+        $this->load->view('modules/multi_pipeline/views/leads/add_modal', $data);
     }
 
     public function get_stages_by_pipeline()
