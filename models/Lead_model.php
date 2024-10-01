@@ -88,7 +88,7 @@ class Lead_model extends App_Model
 
     public function get_staff()
     {
-        return $this->db->get('tblstaff')->result_array(); // Ajuste o nome da tabela conforme necessário
+        return $this->db->get_staff('tblstaff')->result_array(); // Ajuste o nome da tabela conforme necessário
     }
 
 }
