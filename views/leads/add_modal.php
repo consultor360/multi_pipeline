@@ -59,23 +59,40 @@
 
                     
                             <div class="form-group">
-                                <label for="source">Fonte</label>
-                                <select name="source" id="source" class="form-control selectpicker" data-live-search="true" required>
-                                    <?php foreach ($sources as $source) { ?>
-                                        <option value="<?php echo $source['id']; ?>"><?php echo $source['name']; ?></option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="assigned">Atribuído a</label>
-                                <select name="assigned" id="assigned" class="form-control selectpicker" data-live-search="true">
-                                    <option value="">Nenhum</option>
-                                    <?php foreach ($staff as $member) { ?>
-                                        <option value="<?php echo $member['staffid']; ?>"><?php echo $member['firstname'] . ' ' . $member['lastname']; ?></option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                        </div>
+    <label for="source">Fonte</label>
+    <select name="source" id="source" class="form-control selectpicker" data-live-search="true" required>
+        <?php
+        $sources = $this->db->get('tblleads_sources')->result_array();
+        if (!empty($sources)) {
+            foreach ($sources as $source) {
+                ?>
+                <option value="<?php echo $source['id']; ?>"><?php echo $source['name']; ?></option>
+                <?php
+            }
+        } else {
+            ?>
+            <option value="">Nenhuma fonte encontrada</option>
+            <?php
+        }
+        ?>
+    </select>
+</div>
+<div class="form-group">
+    <label for="assigned">Atribuído a</label>
+    <select name="assigned" id="assigned" class="form-control selectpicker" data-live-search="true">
+        <option value="">Nenhum</option>
+        <?php
+        $staff = $this->db->get('tblstaff')->result_array();
+        if (!empty($staff)) {
+            foreach ($staff as $member) {
+                ?>
+                <option value="<?php echo $member['staffid']; ?>"><?php echo $member['firstname'] . ' ' . $member['lastname']; ?></option>
+                <?php
+            }
+        }
+        ?>
+    </select>
+</div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="tags">Tags</label>
