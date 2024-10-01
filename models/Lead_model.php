@@ -76,4 +76,19 @@ class Lead_model extends App_Model
         return $this->db->insert_id();
     }
 
+    public function get_sources()
+    {
+        return $this->db->get('tblleads_sources')->result_array();
+    }
+
+    public function get_status()
+    {
+        return $this->db->get('tblleads_status')->result_array(); // Ajuste o nome da tabela conforme necessário
+    }
+
+    public function get_staff()
+    {
+        return $this->db->get('tblstaff')->result_array(); // Ajuste o nome da tabela conforme necessário
+    }
+
 }
