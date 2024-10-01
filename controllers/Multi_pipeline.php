@@ -309,11 +309,33 @@ public function update_kanban_lead_stage()
 }
 
 public function add_modal($pipeline_id = null, $stage_id = null)
-    {
-        $data['pipeline_id'] = $pipeline_id;
-        $data['stage_id'] = $stage_id;
-        $this->load->view('multi_pipeline/leads/add_modal', $data);
+{
+    // Carregar os pipelines
+    $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines();
+
+    // Carregar os estágios agrupados por pipeline
+    $all_stages = $this->Multi_pipeline_model->get_stages();
+    $data['stages'] = [];
+    foreach ($all_stages as $stage) {
+        $data['stages'][$stage['pipeline_id']][] = $stage;
     }
+
+    // Carregar status
+    $data['statuses'] = $this->Lead_model->get_status();
+
+    // Carregar fontes (sources)
+    $data['sources'] = $this->Lead_model->get_sources();
+
+    // Carregar staff
+    $this->load->model('Lead_model');
+    $data['staff'] = $this->Lead_model->get_staff();
+
+    // Passar os IDs do pipeline e estágio, se fornecidos
+    $data['pipeline_id'] = $pipeline_id;
+    $data['stage_id'] = $stage_id;
+
+    $this->load->view('modules/multi_pipeline/views/leads/add_modal', $data);
+}
     
     public function add_lead()
     {
@@ -336,9 +358,19 @@ public function add_modal($pipeline_id = null, $stage_id = null)
         // Carregar dados necessários para a view
         $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines();
         $data['stages'] = $this->Multi_pipeline_model->get_stages();
-        $data['statuses'] = $this->Multi_pipeline_model->get_all_statuses();
-        $data['sources'] = $this->Leads_model->get_sources(); // Função para obter fontes
-        $data['staff'] = $this->Staff_model->get(); // Função para obter staff
+        $data['statuses'] = $this->Lead_model->get_status(); // Atualizado para Lead_model
+        
+        // Carregar o modelo Lead_model se ainda não estiver carregado
+        if (!$this->load->is_loaded('Lead_model')) {
+            $this->load->model('Lead_model');
+        }
+        $data['sources'] = $this->Lead_model->get_sources(); // Atualizado para Lead_model
+        
+        // Carregar o modelo Lead_model_model se ainda não estiver carregado
+        if (!$this->load->is_loaded('Lead_model')) {
+            $this->load->model('Lead_model');
+        }
+        $data['staff'] = $this->Lead_model->get_staff(); // Função para obter staff
 
         $this->load->view('modules/multi_pipeline/views/leads/add_modal', $data);
     }
