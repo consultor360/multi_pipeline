@@ -13,8 +13,7 @@ class Status extends AdminController
 
     public function index()
     {
-        // L��gica para listar todos os status
-        $data['statuses'] = $this->multi_pipeline_model->get_all_statuses();
+        $data['statuses'] = $this->multi_pipeline_model->get_all_statuses_with_lead_count();
         $data['title'] = _l('lead_statuses');
         $this->load->view('multi_pipeline/status/list', $data);
     }
@@ -24,7 +23,7 @@ class Status extends AdminController
         if ($this->input->post()) {
             $data = $this->input->post();
             
-            // Valida�0�4�0�0o dos dados
+            // Valida0400o dos dados
             $this->load->library('form_validation');
             $this->form_validation->set_rules('name', 'Nome do Status', 'required|trim');
             $this->form_validation->set_rules('color', 'Cor', 'required|trim');
@@ -45,5 +44,56 @@ class Status extends AdminController
         $data['pipelines'] = $this->multi_pipeline_model->get_pipelines();
         $data['title'] = _l('create_lead_status');
         $this->load->view('multi_pipeline/status/create', $data);
+    }
+
+    public function edit($id)
+    {
+        if (!has_permission('multi_pipeline', '', 'edit')) {
+            access_denied('edit_lead_status');
+        }
+
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('name', 'Nome do Status', 'required|trim');
+            $this->form_validation->set_rules('color', 'Cor', 'required|trim');
+            $this->form_validation->set_rules('pipeline_id', 'Pipeline', 'required|numeric');
+            $this->form_validation->set_rules('order', 'Ordem', 'required|numeric');
+
+            if ($this->form_validation->run() === TRUE) {
+                $success = $this->multi_pipeline_model->update_status($id, $data);
+                if ($success) {
+                    set_alert('success', _l('updated_successfully', _l('lead_status')));
+                    redirect(admin_url('multi_pipeline/status'));
+                } else {
+                    set_alert('danger', _l('something_went_wrong'));
+                }
+            }
+        }
+
+        $data['status'] = $this->multi_pipeline_model->get_status($id);
+        if (!$data['status']) {
+            show_404();
+        }
+
+        $data['pipelines'] = $this->multi_pipeline_model->get_pipelines();
+        $data['title'] = _l('edit_lead_status');
+        $this->load->view('multi_pipeline/status/edit', $data);
+    }
+
+    public function delete($id)
+    {
+        if (!has_permission('multi_pipeline', '', 'delete')) {
+            access_denied('delete_lead_status');
+        }
+
+        if ($this->multi_pipeline_model->delete_status($id)) {
+            set_alert('success', _l('deleted_successfully', _l('lead_status')));
+        } else {
+            set_alert('warning', _l('problem_deleting', _l('lead_status')));
+        }
+
+        redirect(admin_url('multi_pipeline/status'));
     }
 }
