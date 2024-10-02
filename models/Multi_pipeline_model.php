@@ -412,4 +412,10 @@ public function add_lead($data)
     return ($this->db->affected_rows() > 0) ? $this->db->insert_id() : false;
 }
 
+public function get_pipeline($id)
+{
+    $this->db->where('id', $id);
+    return $this->db->get('tblmulti_pipeline_pipelines')->row_array();
+}
+
 }
