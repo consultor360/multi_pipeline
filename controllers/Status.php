@@ -13,7 +13,7 @@ class Status extends AdminController
 
     public function index()
     {
-        // L¨®gica para listar todos os status
+        // Lï¿½ï¿½gica para listar todos os status
         $data['statuses'] = $this->multi_pipeline_model->get_all_statuses();
         $data['title'] = _l('lead_statuses');
         $this->load->view('multi_pipeline/status/list', $data);
@@ -24,7 +24,7 @@ class Status extends AdminController
         if ($this->input->post()) {
             $data = $this->input->post();
             
-            // Valida0Š40Š0o dos dados
+            // Validaï¿½0ï¿½4ï¿½0ï¿½0o dos dados
             $this->load->library('form_validation');
             $this->form_validation->set_rules('name', 'Nome do Status', 'required|trim');
             $this->form_validation->set_rules('color', 'Cor', 'required|trim');
@@ -35,7 +35,7 @@ class Status extends AdminController
                 $id = $this->multi_pipeline_model->add_status($data);
                 if ($id) {
                     set_alert('success', _l('added_successfully', _l('lead_status')));
-                    redirect(admin_url('multi_pipeline/status'));
+                    redirect(admin_url('multi_pipeline/status/create/' . $pipeline_id));
                 } else {
                     set_alert('danger', _l('something_went_wrong'));
                 }

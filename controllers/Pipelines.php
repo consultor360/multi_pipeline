@@ -10,20 +10,20 @@ class Pipelines extends AdminController
         parent::__construct();
         $this->load->model('Multi_pipeline_model');
         $this->load->model('Lead_model');
+        $this->load->model('multi_pipeline_model');
     }
 
     public function index()
     {
-        $data['title'] = _l('pipelines');
-
-        // Consultar a tabela "db_prefix() . 'leads'" e filtrar por pipeline_id válido
-        $leads = $this->db->query("SELECT * FROM tblleads WHERE pipeline_id IS NOT NULL");
-
-        // Passar os leads filtrados para a view
-        $data['leads'] = $leads->result_array();
-
-        $data['multi_pipeline_pipelines'] = $this->multi_pipeline_model->get_pipelines();
-        $this->load->view('multi_pipeline/pipelines/list', $data);
+        // Busca todos os pipelines da tabela tblmulti_pipeline_pipelines
+        $pipelines = $this->db->get('tblmulti_pipeline_pipelines')->result();
+        
+        // Prepara os dados para a view
+        $data['pipelines'] = $pipelines;
+        $data['title'] = _l('pipelines'); // Mantém o título existente
+        
+        // Carrega a view com os dados
+        $this->load->view('pipelines/view', $data);
     }
     
     public function view($id)

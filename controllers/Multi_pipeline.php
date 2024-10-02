@@ -138,7 +138,7 @@ class Multi_pipeline extends AdminController
                 if ($pipeline_id) {
                     log_activity('New Pipeline Created [ID: ' . $pipeline_id . ', Name: ' . $data['name'] . ']');
                     set_alert('success', _l('pipeline_created_successfully'));
-                    redirect(admin_url('multi_pipeline/view_pipeline/' . $pipeline_id));
+                    redirect(admin_url('multi_pipeline/status/create/' . $pipeline_id));
                 } else {
                     set_alert('danger', _l('pipeline_creation_failed'));
                 }
