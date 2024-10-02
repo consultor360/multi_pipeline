@@ -123,12 +123,29 @@ $(function() {
             var leadId = item.data('lead-id');
             var pipelineId = item.closest('.kan-ban-col').data('pipeline-id');
 
-            $.post(admin_url + 'leads/update_lead_status', {
-                lead_id: leadId,
-                status_id: stageId,
-                pipeline_id: pipelineId
-            }).done(function(response) {
-                // Atualizar a UI conforme necessário
+            $.ajax({
+                url: admin_url + 'multi_pipeline/change_lead_pipeline_stage',
+                type: 'POST',
+                data: {
+                    lead_id: leadId,
+                    pipeline_id: pipelineId,
+                    stage_id: stageId
+                },
+                success: function(response) {
+                    var result = JSON.parse(response);
+                    if (result.success) {
+                        alert_float('success', result.message);
+                    } else {
+                        alert_float('danger', result.message);
+                        // Reverter a posição do item se a atualização falhar
+                        $(ui.sender).sortable('cancel');
+                    }
+                },
+                error: function() {
+                    alert_float('danger', 'Erro ao atualizar o lead');
+                    // Reverter a posição do item se houver um erro
+                    $(ui.sender).sortable('cancel');
+                }
             });
         }
     }).disableSelection();
