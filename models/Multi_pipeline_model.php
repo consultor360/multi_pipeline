@@ -418,4 +418,33 @@ public function get_pipeline($id)
     return $this->db->get('tblmulti_pipeline_pipelines')->row_array();
 }
 
+public function update_status($id, $data)
+{
+    $this->db->where('id', $id);
+    return $this->db->update('tblmulti_pipeline_stages', $data);
+}
+
+public function get_status($id)
+{
+    $this->db->where('id', $id);
+    return $this->db->get('tblmulti_pipeline_stages')->row_array();
+}
+
+public function delete_status($id)
+{
+    $this->db->where('id', $id);
+    return $this->db->delete('tblmulti_pipeline_stages');
+}
+
+public function get_all_statuses_with_lead_count()
+{
+    $this->db->select('tblmulti_pipeline_stages.*, tblmulti_pipeline_pipelines.name as pipeline_name, COUNT(tblleads.id) as lead_count');
+    $this->db->from('tblmulti_pipeline_stages');
+    $this->db->join('tblmulti_pipeline_pipelines', 'tblmulti_pipeline_pipelines.id = tblmulti_pipeline_stages.pipeline_id', 'left');
+    $this->db->join('tblleads', 'tblleads.stage_id = tblmulti_pipeline_stages.id', 'left');
+    $this->db->group_by('tblmulti_pipeline_stages.id');
+    $this->db->order_by('tblmulti_pipeline_stages.pipeline_id, tblmulti_pipeline_stages.order');
+    return $this->db->get()->result_array();
+}
+
 }
