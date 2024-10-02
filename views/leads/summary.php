@@ -1,3 +1,5 @@
+// Caminho: /public_html/modules/multi_pipeline/views/leads/summary.php
+
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php init_head(); ?>
 <div id="wrapper">
@@ -35,8 +37,7 @@
                                     <th><?php echo _l('lead_value'); ?></th>
                                     <th><?php echo _l('tags'); ?></th>
                                     <th><?php echo _l('leads_dt_assigned'); ?></th>
-                                    <th><?php echo _l('lead_stage'); ?></th>
-                                    <th><?php echo _l('pipeline'); ?></th>
+                                    <th><?php echo _l('pipeline_stage'); ?></th>
                                     <th><?php echo _l('leads_source'); ?></th>
                                     <th><?php echo _l('leads_dt_last_contact'); ?></th>
                                     <th><?php echo _l('leads_dt_datecreated'); ?></th>
@@ -44,7 +45,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach($leads as $leads){ ?>
+                            <?php foreach($leads as $lead){ ?>
                                 <tr>
                                     <td><?php echo $lead['id']; ?></td>
                                     <td><a href="<?php echo admin_url('leads/index/'.$lead['id']); ?>"><?php echo $lead['name']; ?></a></td>
@@ -55,16 +56,13 @@
                                     <td><?php echo render_tags($lead['tags']); ?></td>
                                     <td><?php echo get_staff_full_name($lead['assigned']); ?></td>
                                     <td>
-                                        <select onchange="change_lead_stage(this.value, <?php echo $lead['id']; ?>)">
-                                            <?php foreach($stages as $stage){ ?>
-                                                <option value="<?php echo $stage['id']; ?>" <?php if($lead['stage_id'] == $stage['id']){echo 'selected';} ?>><?php echo $stage['name']; ?></option>
-                                            <?php } ?>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select onchange="change_lead_pipeline(this.value, <?php echo $lead['id']; ?>)">
+                                        <select onchange="change_lead_pipeline_stage(this.value, <?php echo $lead['id']; ?>)">
                                             <?php foreach($pipelines as $pipeline){ ?>
-                                                <option value="<?php echo $pipeline['id']; ?>" <?php if($lead['pipeline_id'] == $pipeline['id']){echo 'selected';} ?>><?php echo $pipeline['name']; ?></option>
+                                                <optgroup label="<?php echo $pipeline['name']; ?>">
+                                                    <?php foreach($pipeline['stages'] as $stage){ ?>
+                                                        <option value="<?php echo $pipeline['id'] . ',' . $stage['id']; ?>" <?php if($lead['pipeline_id'] == $pipeline['id'] && $lead['stage_id'] == $stage['id']){echo 'selected';} ?>><?php echo $pipeline['name'] . ' - ' . $stage['name']; ?></option>
+                                                    <?php } ?>
+                                                </optgroup>
                                             <?php } ?>
                                         </select>
                                     </td>
@@ -104,18 +102,11 @@
 </div>
 <?php init_tail(); ?>
 <script>
-function change_lead_stage(stage_id, lead_id) {
-    $.post(admin_url + 'multi_pipeline/change_lead_stage', {
-        stage_id: stage_id,
-        lead_id: lead_id
-    }).done(function(response) {
-        // Atualizar a UI conforme necessário
-    });
-}
-
-function change_lead_pipeline(pipeline_id, lead_id) {
-    $.post(admin_url + 'multi_pipeline/change_lead_pipeline', {
+function change_lead_pipeline_stage(value, lead_id) {
+    var [pipeline_id, stage_id] = value.split(',');
+    $.post(admin_url + 'multi_pipeline/change_lead_pipeline_stage', {
         pipeline_id: pipeline_id,
+        stage_id: stage_id,
         lead_id: lead_id
     }).done(function(response) {
         // Atualizar a UI conforme necessário
