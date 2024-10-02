@@ -96,16 +96,16 @@ function multi_pipeline_init_menu_items() {
             'icon'     => 'fa fa-eye',
         ],
         [
-            'slug'     => 'edit-pipeline',
-            'name'     => _l('Edit Pipeline'),
-            'href'     => get_edit_pipeline_url($id), // Now $id is defined
-            'icon'     => 'fa fa-pencil',
+            'slug'     => 'multi_pipeline_summary',
+            'name'     => _l('lead summary'),
+            'href'     => admin_url('multi_pipeline/summary'),
+            'icon'     => 'fa fa-chart-bar',
         ],
         [
-            'slug'     => 'delete-pipeline',
-            'name'     => _l('Delete Pipeline'),
-            'href'     => admin_url('multi_pipeline/delete_pipeline'),
-            'icon'     => 'fa fa-trash',
+            'slug'     => 'multi_pipeline_add_lead',
+            'name'     => _l('add_new_lead'),
+            'href'     => admin_url('multi_pipeline/add_lead'),
+            'icon'     => 'fa fa-plus',
         ],
         [
             'slug'     => 'create-status',
