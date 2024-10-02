@@ -359,6 +359,8 @@ public function add_modal($pipeline_id = null, $stage_id = null)
         $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines();
         $data['stages'] = $this->Multi_pipeline_model->get_stages();
         $data['statuses'] = $this->Lead_model->get_status(); // Atualizado para Lead_model
+        $data['title'] = _l('add_new_lead');
+        $this->load->view('multi_pipeline/leads/add', $data);
         
         // Carregar o modelo Lead_model se ainda não estiver carregado
         if (!$this->load->is_loaded('Lead_model')) {
@@ -380,5 +382,15 @@ public function add_modal($pipeline_id = null, $stage_id = null)
         $pipeline_id = $this->input->post('pipeline_id');
         $stages = $this->multi_pipeline_model->get_stages_by_pipeline($pipeline_id);
         echo json_encode($stages);
+    }
+
+    public function summary()
+    {
+        if (!$this->Multi_pipeline_model) {
+            $this->load->model('Multi_pipeline_model');
+        }
+        $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines_with_lead_count();
+        $data['title'] = _l('lead_summary');
+        $this->load->view('multi_pipeline/leads/summary', $data);
     }
 }
