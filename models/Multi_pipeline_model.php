@@ -447,4 +447,13 @@ public function get_all_statuses_with_lead_count()
     return $this->db->get()->result_array();
 }
 
+public function get_pipelines_with_lead_count()
+{
+    $this->db->select('p.*, COUNT(l.id) as lead_count');
+    $this->db->from('tblmulti_pipeline_pipelines p');
+    $this->db->join('tblleads l', 'l.pipeline_id = p.id', 'left');
+    $this->db->group_by('p.id');
+    return $this->db->get()->result_array();
+}
+
 }
