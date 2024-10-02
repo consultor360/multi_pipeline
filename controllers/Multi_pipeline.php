@@ -27,6 +27,7 @@ class Multi_pipeline extends AdminController
         $this->load->model('Multi_pipeline_model');
         $this->load->library('form_validation');
         $this->load->model('Pipeline_model');
+        $this->load->model('currencies_model');
     }
 
     /**
@@ -389,8 +390,25 @@ public function add_modal($pipeline_id = null, $stage_id = null)
         if (!$this->Multi_pipeline_model) {
             $this->load->model('Multi_pipeline_model');
         }
-        $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines_with_lead_count();
+        $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines_with_stages_and_lead_count();
+        $data['leads'] = $this->Multi_pipeline_model->get_all_leads();
+        $data['base_currency'] = $this->currencies_model->get_base_currency();
         $data['title'] = _l('lead_summary');
         $this->load->view('multi_pipeline/leads/summary', $data);
     }
+
+    public function change_lead_pipeline_stage()
+{
+    $lead_id = $this->input->post('lead_id');
+    $pipeline_id = $this->input->post('pipeline_id');
+    $stage_id = $this->input->post('stage_id');
+
+    $result = $this->Multi_pipeline_model->update_lead_pipeline_stage($lead_id, $pipeline_id, $stage_id);
+
+    if ($result) {
+        echo json_encode(['success' => true, 'message' => _l('lead_pipeline_stage_updated_successfully')]);
+    } else {
+        echo json_encode(['success' => false, 'message' => _l('lead_pipeline_stage_update_failed')]);
+    }
+}
 }
