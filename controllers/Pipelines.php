@@ -68,7 +68,10 @@ class Pipelines extends AdminController
                 redirect(admin_url('multi_pipeline/pipelines'));
             }
         }
-        $data['pipeline'] = $this->multi_pipeline_model->get_pipelines($id);
+        $data['pipeline'] = $this->multi_pipeline_model->get_pipeline($id);
+        if (!$data['pipeline']) {
+            show_404();
+        }
         $data['title'] = _l('edit_pipeline');
         $this->load->view('multi_pipeline/pipelines/edit', $data);
     }
