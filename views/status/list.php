@@ -16,6 +16,7 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                     <tr>
                                         <th><?php echo _l('lead_status_name'); ?></th>
                                         <th><?php echo _l('pipeline_name'); ?></th>
+                                        <th><?php echo _l('lead_count'); ?></th>
                                         <th><?php echo _l('lead_status_color'); ?></th>
                                         <th><?php echo _l('options'); ?></th>
                                     </tr>
@@ -25,10 +26,11 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                     <tr>
                                         <td><?php echo $status['name']; ?></td>
                                         <td><?php echo $status['pipeline_name']; ?></td>
+                                        <td><?php echo $status['lead_count']; ?></td>
                                         <td><span class="label" style="background-color: <?php echo $status['color']; ?>"><?php echo $status['color']; ?></span></td>
                                         <td>
-                                            <a href="<?php echo admin_url('multi_pipeline/status/edit/' . $status['id']); ?>" class="btn btn-default btn-icon"><i class="fa fa-pencil-square-o"></i></a>
-                                            <a href="<?php echo admin_url('multi_pipeline/status/delete/' . $status['id']); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
+                                            <a href="<?php echo admin_url('multi_pipeline/status/edit/' . $status['id']); ?>" class="btn btn-default btn-icon" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil"></i></a>
+                                            <a href="<?php echo admin_url('multi_pipeline/status/delete/' . $status['id']); ?>" class="btn btn-danger btn-icon _delete" data-toggle="tooltip" data-placement="top" title="<?php echo _l('delete'); ?>"><i class="fa fa-trash"></i></a>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
