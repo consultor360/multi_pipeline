@@ -45,7 +45,14 @@ class Lead_model extends App_Model
         return $grouped_leads;
     }
 
-    public function add_lead($data) {
+    /**
+     * Adiciona um novo lead na tabela tblleads
+     *
+     * @param array $data Dados do lead
+     * @return int|bool ID do lead inserido ou false em falha
+     */
+    public function add_lead($data)
+    {
         // Preparar os dados do lead
         $lead_data = array(
             'name'          => $data['name'],
@@ -73,7 +80,7 @@ class Lead_model extends App_Model
 
         // Inserir o lead na tabela
         $this->db->insert('tblleads', $lead_data);
-        return $this->db->insert_id();
+        return ($this->db->affected_rows() > 0) ? $this->db->insert_id() : false;
     }
 
     public function get_sources()

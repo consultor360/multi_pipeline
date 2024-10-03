@@ -210,23 +210,30 @@ public function get_pipeline_leads($pipeline_id, $where = [])
      */
     public function move_lead_to_pipeline($lead_id, $new_pipeline_id)
     {
+        $this->db->trans_start();
+
+        // Obter o estágio inicial do novo pipeline
         $first_stage = $this->db->where('pipeline_id', $new_pipeline_id)
                                 ->order_by('order', 'ASC')
                                 ->limit(1)
-                                ->get('tblmulti_pipeline_stages')
+                                ->get('multi_pipeline_stages')
                                 ->row();
 
         if (!$first_stage) {
+            $this->db->trans_complete();
             return false;
         }
 
-        $this->db->where('perfex_lead_id', $lead_id);
+        // Atualizar o lead
+        $this->db->where('id', $lead_id);
         $this->db->update('tblleads', [
             'pipeline_id' => $new_pipeline_id,
             'stage_id' => $first_stage->id
         ]);
 
-        return $this->db->affected_rows() > 0;
+        $this->db->trans_complete();
+
+        return $this->db->trans_status();
     }
     
     public function get_first_pipeline()
@@ -486,4 +493,81 @@ public function update_lead_pipeline_stage($lead_id, $pipeline_id, $stage_id)
     return $this->db->affected_rows() > 0;
 }
 
+    /**
+     * Adiciona uma nova associação de formulário
+     * 
+     * @param array $data
+     * @return int|bool ID da associação inserida ou false em falha
+     */
+    public function add_form_association($data)
+    {
+        $this->db->insert('multi_pipeline_form_associations', $data);
+        return ($this->db->affected_rows() > 0) ? $this->db->insert_id() : false;
+    }
+
+    /**
+     * Atualiza uma associação de formulário
+     * 
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function update_form_association($id, $data)
+    {
+        $this->db->where('id', $id);
+        $this->db->update('multi_pipeline_form_associations', $data);
+        return $this->db->affected_rows() > 0;
+    }
+
+    /**
+     * Exclui uma associação de formulário
+     * 
+     * @param int $id
+     * @return bool
+     */
+    public function delete_form_association($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->delete('multi_pipeline_form_associations');
+        return $this->db->affected_rows() > 0;
+    }
+
+    /**
+     * Obtém as associações de formulários
+     *
+     * @return array
+     */
+    public function get_form_associations()
+    {
+        $this->db->select('fa.id, f.name as form_name, p.name as pipeline_name, s.name as stage_name');
+        $this->db->from('multi_pipeline_form_associations fa');
+        $this->db->join('tblweb_to_lead f', 'fa.form_id = f.id', 'left');
+        $this->db->join('multi_pipeline_pipelines p', 'fa.pipeline_id = p.id', 'left');
+        $this->db->join('multi_pipeline_stages s', 'fa.stage_id = s.id', 'left');
+        return $this->db->get()->result_array();
+    }
+
+    /**
+     * Obtém os pipelines com seus estágios
+     *
+     * @return array
+     */
+    public function get_pipelines_with_stages()
+    {
+        $this->db->select('p.id as pipeline_id, p.name as pipeline_name, s.id as stage_id, s.name as stage_name');
+        $this->db->from('multi_pipeline_pipelines p');
+        $this->db->join('multi_pipeline_stages s', 'p.id = s.pipeline_id', 'left');
+        $this->db->order_by('p.id, s.order', 'ASC');
+        $pipelines = $this->db->get()->result_array();
+
+        $result = [];
+        foreach ($pipelines as $pipeline) {
+            $result[$pipeline['pipeline_id']]['pipeline_name'] = $pipeline['pipeline_name'];
+            $result[$pipeline['pipeline_id']]['stages'][] = [
+                'id' => $pipeline['stage_id'],
+                'name' => $pipeline['stage_name']
+            ];
+        }
+        return $result;
+    }
 }
