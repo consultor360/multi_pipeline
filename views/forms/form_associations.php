@@ -21,7 +21,9 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                         <select name="form_id" id="form_id" class="form-control selectpicker" data-live-search="true" required>
                                             <option value=""><?php echo _l('select_form'); ?></option>
                                             <?php foreach($forms as $form): ?>
-                                                <option value="<?php echo $form['id']; ?>"><?php echo $form['name']; ?></option>
+                                                <option value="<?php echo $form['id']; ?>" <?php echo (isset($association['form_id']) && $association['form_id'] == $form['id']) ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($form['name']); ?>
+                                                </option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
@@ -31,10 +33,12 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                         <label for="pipeline_stage"><?php echo _l('select_pipeline_stage'); ?></label>
                                         <select name="pipeline_stage" id="pipeline_stage" class="form-control selectpicker" data-live-search="true" required>
                                             <option value=""><?php echo _l('select_pipeline_stage'); ?></option>
-                                            <?php foreach($pipelines as $pipeline): ?>
-                                                <optgroup label="<?php echo $pipeline['name']; ?>">
+                                            <?php foreach($pipelines as $pipeline_id => $pipeline): ?>
+                                                <optgroup label="<?php echo htmlspecialchars($pipeline['pipeline_name']); ?>" style="font-weight: bold;">
                                                     <?php foreach($pipeline['stages'] as $stage): ?>
-                                                        <option value="<?php echo $pipeline['id'] . ',' . $stage['id']; ?>"><?php echo $stage['name']; ?></option>
+                                                        <option value="<?php echo $pipeline_id . ',' . $stage['id']; ?>" <?php echo (isset($association['pipeline_id']) && $association['pipeline_id'] == $pipeline_id && isset($association['stage_id']) && $association['stage_id'] == $stage['id']) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($stage['name']); ?>
+                                                        </option>
                                                     <?php endforeach; ?>
                                                 </optgroup>
                                             <?php endforeach; ?>
@@ -48,6 +52,9 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                     </div>
                                 </div>
                             </div>
+                            <?php if(isset($association)): ?>
+                                <input type="hidden" name="association_id" value="<?php echo htmlspecialchars($association['id']); ?>">
+                            <?php endif; ?>
                         </form>
 
                         <hr class="hr-panel-heading" />
@@ -63,14 +70,14 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach($associations as $association): ?>
+                                <?php foreach($associations as $assoc): ?>
                                     <tr>
-                                        <td><?php echo $association['form_name']; ?></td>
-                                        <td><?php echo $association['pipeline_name']; ?></td>
-                                        <td><?php echo $association['stage_name']; ?></td>
+                                        <td><?php echo htmlspecialchars($assoc['form_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($assoc['pipeline_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($assoc['stage_name']); ?></td>
                                         <td>
-                                            <a href="<?php echo admin_url('multi_pipeline/edit_form_association/'.$association['id']); ?>" class="btn btn-default btn-icon"><i class="fa fa-pencil"></i></a>
-                                            <a href="<?php echo admin_url('multi_pipeline/delete_form_association/'.$association['id']); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
+                                            <a href="<?php echo admin_url('multi_pipeline/edit_form_association/'.$assoc['id']); ?>" class="btn btn-default btn-icon"><i class="fa fa-pencil"></i></a>
+                                            <a href="<?php echo admin_url('multi_pipeline/delete_form_association/'.$assoc['id']); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
