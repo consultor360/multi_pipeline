@@ -108,6 +108,12 @@ function multi_pipeline_init_menu_items() {
             'icon'     => 'fa fa-plus',
         ],
         [
+            'slug'     => 'form-associations',
+            'name'     => _l('Form Associations'),
+            'href'     => admin_url('multi_pipeline/form_associations'),
+            'icon'     => 'fa fa-link',
+        ],
+        [
             'slug'     => 'create-status',
             'name'     => _l('Create Status'),
             'href'     => admin_url('multi_pipeline/status/create'),
