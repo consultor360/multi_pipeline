@@ -28,6 +28,7 @@ class Multi_pipeline extends AdminController
         $this->load->library('form_validation');
         $this->load->model('Pipeline_model');
         $this->load->model('currencies_model');
+        $this->load->model('Lead_model'); // Adicionado
     }
 
     /**
@@ -411,4 +412,120 @@ public function add_modal($pipeline_id = null, $stage_id = null)
         echo json_encode(['success' => false, 'message' => _l('lead_pipeline_stage_update_failed')]);
     }
 }
+
+    /**
+     * Salva uma associação de formulário
+     */
+    public function save_form_association()
+    {
+        if (!has_permission('multi_pipeline', '', 'create') && !has_permission('multi_pipeline', '', 'edit')) {
+            access_denied('multi_pipeline');
+        }
+
+        $this->form_validation->set_rules('form_id', 'Formulário', 'required|integer');
+        $this->form_validation->set_rules('pipeline_stage', 'Pipeline e Estágio', 'required');
+
+        if ($this->form_validation->run() === FALSE) {
+            set_alert('danger', validation_errors());
+            redirect(admin_url('multi_pipeline'));
+        }
+
+        $pipeline_stage = explode(',', $this->input->post('pipeline_stage'));
+        $pipeline_id = $pipeline_stage[0];
+        $stage_id = $pipeline_stage[1];
+        $form_id = $this->input->post('form_id');
+
+        // Verifica se já existe associação para o formulário
+        $existing = $this->db->where('form_id', $form_id)->get('multi_pipeline_form_associations')->row();
+        if ($existing) {
+            // Atualiza a associação existente
+            $data = [
+                'pipeline_id' => $pipeline_id,
+                'stage_id' => $stage_id,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $this->Multi_pipeline_model->update_form_association($existing->id, $data);
+            set_alert('success', 'Associação atualizada com sucesso.');
+        } else {
+            // Cria uma nova associação
+            $data = [
+                'form_id' => $form_id,
+                'pipeline_id' => $pipeline_id,
+                'stage_id' => $stage_id,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            $new_id = $this->Multi_pipeline_model->add_form_association($data);
+            if ($new_id) {
+                set_alert('success', 'Associação criada com sucesso.');
+            } else {
+                set_alert('danger', 'Falha ao criar a associação.');
+            }
+        }
+
+        redirect(admin_url('multi_pipeline'));
+    }
+
+    /**
+     * Edita uma associação de formulário
+     * 
+     * @param int $id
+     */
+    public function edit_form_association($id)
+    {
+        if (!has_permission('multi_pipeline', '', 'edit')) {
+            access_denied('multi_pipeline');
+        }
+
+        $association = $this->Multi_pipeline_model->get_form_associations();
+        $association = array_filter($association, function($assoc) use ($id) {
+            return $assoc['id'] == $id;
+        });
+
+        if (empty($association)) {
+            show_404();
+        }
+
+        $data['association'] = array_shift($association);
+        $data['forms'] = $this->db->get('tblweb_to_lead')->result_array();
+        $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines();
+        $data['title'] = 'Editar Associação de Formulário';
+
+        $this->load->view('forms/edit_form_association', $data);
+    }
+
+    /**
+     * Deleta uma associação de formulário
+     * 
+     * @param int $id
+     */
+    public function delete_form_association($id)
+    {
+        if (!has_permission('multi_pipeline', '', 'delete')) {
+            access_denied('multi_pipeline');
+        }
+
+        if ($this->Multi_pipeline_model->delete_form_association($id)) {
+            set_alert('success', 'Associação deletada com sucesso.');
+        } else {
+            set_alert('danger', 'Falha ao deletar a associação.');
+        }
+
+        redirect(admin_url('multi_pipeline'));
+    }
+
+    public function form_associations()
+    {
+        if (!has_permission('multi_pipeline', '', 'view')) {
+            access_denied('multi_pipeline');
+        }
+
+        // Carregar dados necessários
+        $data['forms'] = $this->db->get('tblweb_to_lead')->result_array();
+        $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines_with_stages();
+        $data['associations'] = $this->Multi_pipeline_model->get_form_associations();
+        $data['title'] = _l('form_associations');
+
+        // Carregar a view
+        $this->load->view('forms/form_associations', $data);
+    }
 }
