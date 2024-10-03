@@ -483,7 +483,7 @@ public function update_lead_pipeline_stage($lead_id, $pipeline_id, $stage_id)
         'stage_id' => $stage_id
     ]);
 
-    return $result;
+    return $this->db->affected_rows() > 0;
 }
 
 }
