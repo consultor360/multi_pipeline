@@ -14,6 +14,7 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                         
                         <!-- Formulário de Associação -->
                         <form action="<?php echo admin_url('multi_pipeline/save_form_association'); ?>" method="post">
+                            <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
