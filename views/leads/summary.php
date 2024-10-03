@@ -29,32 +29,35 @@
                         <table class="table dt-table table-leads" data-order-col="2" data-order-type="desc">
                             <thead>
                                 <tr>
-                                    <th><?php echo _l('id'); ?></th>
+                                    <th><?php echo _l('options'); ?></th>
                                     <th><?php echo _l('lead_name'); ?></th>
                                     <th><?php echo _l('lead_company'); ?></th>
                                     <th><?php echo _l('lead_email'); ?></th>
                                     <th><?php echo _l('lead_phonenumber'); ?></th>
-                                    <th><?php echo _l('lead_value'); ?></th>
-                                    <th><?php echo _l('tags'); ?></th>
-                                    <th><?php echo _l('leads_dt_assigned'); ?></th>
                                     <th><?php echo _l('pipeline_stage'); ?></th>
-                                    <th><?php echo _l('leads_source'); ?></th>
+                                    <th><?php echo _l('lead_value'); ?></th>
+                                    <th><?php echo _l('leads_dt_assigned'); ?></th>
                                     <th><?php echo _l('leads_dt_last_contact'); ?></th>
                                     <th><?php echo _l('leads_dt_datecreated'); ?></th>
-                                    <th><?php echo _l('options'); ?></th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php foreach($leads as $lead){ ?>
                                 <tr>
-                                    <td><?php echo $lead['id']; ?></td>
+                                    <td>
+                                        <a href="<?php echo admin_url('leads/index/'.$lead['id']); ?>" class="btn btn-default btn-icon">
+                                            <i class="fa fa-pencil"></i>
+                                        </a>
+                                        <?php if(has_permission('leads','','delete')){ ?>
+                                        <a href="<?php echo admin_url('leads/delete/'.$lead['id']); ?>" class="btn btn-danger btn-icon delete-lead">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                        <?php } ?>
+                                    </td>
                                     <td><a href="<?php echo admin_url('leads/index/'.$lead['id']); ?>"><?php echo $lead['name']; ?></a></td>
                                     <td><?php echo $lead['company']; ?></td>
                                     <td><?php echo $lead['email']; ?></td>
                                     <td><?php echo $lead['phonenumber']; ?></td>
-                                    <td><?php echo app_format_money($lead['lead_value'], $base_currency); ?></td>
-                                    <td><?php echo render_tags($lead['tags']); ?></td>
-                                    <td><?php echo get_staff_full_name($lead['assigned']); ?></td>
                                     <td>
                                         <select onchange="change_lead_pipeline_stage(this.value, <?php echo $lead['id']; ?>)">
                                             <?php foreach($pipelines as $pipeline){ ?>
@@ -66,30 +69,10 @@
                                             <?php } ?>
                                         </select>
                                     </td>
-                                    <td><?php echo $lead['source_name']; ?></td>
+                                    <td><?php echo app_format_money($lead['lead_value'], $base_currency); ?></td>
+                                    <td><?php echo get_staff_full_name($lead['assigned']); ?></td>
                                     <td><?php echo ($lead['lastcontact'] ? _dt($lead['lastcontact']) : '-') ?></td>
                                     <td><?php echo _dt($lead['dateadded']); ?></td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <i class="fa fa-ellipsis-v"></i>
-                                            </a>
-                                            <ul class="dropdown-menu dropdown-menu-right">
-                                                <li>
-                                                    <a href="<?php echo admin_url('leads/index/'.$lead['id']); ?>">
-                                                        <i class="fa fa-pencil-square-o"></i> <?php echo _l('edit'); ?>
-                                                    </a>
-                                                </li>
-                                                <?php if(has_permission('leads','','delete')){ ?>
-                                                <li>
-                                                    <a href="<?php echo admin_url('leads/delete/'.$lead['id']); ?>" class="text-danger delete-lead">
-                                                        <i class="fa fa-remove"></i> <?php echo _l('delete'); ?>
-                                                    </a>
-                                                </li>
-                                                <?php } ?>
-                                            </ul>
-                                        </div>
-                                    </td>
                                 </tr>
                             <?php } ?>
                             </tbody>
