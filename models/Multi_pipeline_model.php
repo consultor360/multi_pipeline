@@ -11,6 +11,20 @@ class Multi_pipeline_model extends App_Model
     public function __construct()
     {
         parent::__construct();
+        
+        $this->load->database();
+        $this->load->helper('url');
+        $this->load->helper('date');
+        $this->load->library('encryption');
+        
+        // Carregar modelos relacionados
+        $this->load->model('Pipeline_model');
+        $this->load->model('Lead_model');
+        
+        // Inicializar variáveis de configuração
+        $this->table_pipelines = 'tblmulti_pipeline_pipelines';
+        $this->table_stages = 'tblmulti_pipeline_stages';
+        $this->table_leads = 'tblleads';
     }
 
     /**
@@ -117,10 +131,9 @@ public function get_pipeline_leads($pipeline_id, $where = [])
     }
 
     /**
-     * Delete a pipeline and handle related data
-     * 
-     * @param int $id
-     * @return bool
+     * Exclui um pipeline e lida com dados relacionados
+     * @param int $id ID do pipeline a ser excluído
+     * @return bool Verdadeiro se excluído com sucesso, falso caso contrário
      */
     public function delete_pipeline($id)
     {
@@ -142,16 +155,21 @@ public function get_pipeline_leads($pipeline_id, $where = [])
     }
 
     /**
-     * Update lead stage
+     * Atualiza o estágio de um lead
      * 
-     * @param int $lead_id
-     * @param int $stage_id
-     * @return bool
+     * @param int $lead_id ID do lead no Perfex CRM
+     * @param int $stage_id ID do novo estágio
+     * @return bool Verdadeiro se atualizado com sucesso, falso caso contrário
      */
     public function update_lead_stage($lead_id, $stage_id)
     {
+        // Seleciona o lead com base no ID do Perfex CRM
         $this->db->where('perfex_lead_id', $lead_id);
+        
+        // Atualiza o estágio do lead na tabela tblleads
         $this->db->update('tblleads', ['stage_id' => $stage_id]);
+        
+        // Retorna verdadeiro se pelo menos uma linha foi afetada, falso caso contrário
         return $this->db->affected_rows() > 0;
     }
 
@@ -243,6 +261,8 @@ public function get_pipeline_leads($pipeline_id, $where = [])
     
     public function create_triggers() {
     $db = CRM_DBManagerFactory::getInstance();
+
+    // Cria um trigger que atualiza a tabela de estágios após a inserção de um novo lead
     $db->query("CREATE TRIGGER after_lead_insert_update_stage
                 AFTER INSERT ON tblleads
                 FOR EACH ROW
@@ -252,6 +272,7 @@ public function get_pipeline_leads($pipeline_id, $where = [])
                     WHERE id = NEW.stage_id;
                 END;");
 
+    // Cria um trigger que atualiza a tabela de leads após a atualização de um estágio
     $db->query("CREATE TRIGGER after_stage_update_update_lead
                 AFTER UPDATE ON tblstages
                 FOR EACH ROW
@@ -262,56 +283,112 @@ public function get_pipeline_leads($pipeline_id, $where = [])
                 END;");
 }
 
+/**
+ * Adiciona um novo pipeline ao banco de dados
+ *
+ * @param array $data Dados do pipeline a ser adicionado
+ * @return int ID do pipeline recém-inserido
+ */
 public function add_pipelines($data)
 {
     $this->db->insert('tblmulti_pipeline_pipelines', $data);
     return $this->db->insert_id();
 }
 
+/**
+ * Atualiza um pipeline existente no banco de dados
+ *
+ * @param int $id ID do pipeline a ser atualizado
+ * @param array $data Novos dados do pipeline
+ * @return bool Resultado da operação de atualização
+ */
 public function update_pipelines($id, $data)
 {
     $this->db->where('id', $id);
     return $this->db->update('tblmulti_pipeline_pipelines', $data);
 }
 
+/**
+ * Exclui um pipeline do banco de dados
+ *
+ * @param int $id ID do pipeline a ser excluído
+ * @return bool Resultado da operação de exclusão
+ */
 public function delete_pipelines($id)
 {
     $this->db->where('id', $id);
     return $this->db->delete('tblmulti_pipeline_pipelines');
 }
 
+/**
+ * Obtém todos os status (estágios) de todos os pipelines
+ *
+ * @return array Lista de todos os status com suas informações
+ */
 public function get_all_statuses() {
-        $this->db->select('id, name, pipeline_name, pipeline_id, color, order');
-        $this->db->from('tblmulti_pipeline_stages');
-        $query = $this->db->get();
-        return $query->result_array();
-    }
+    $this->db->select('id, name, pipeline_name, pipeline_id, color, order');
+    $this->db->from('tblmulti_pipeline_stages');
+    $query = $this->db->get();
+    return $query->result_array();
+}
 
+/**
+ * Adiciona um novo status (estágio) a um pipeline
+ *
+ * @param array $data Dados do status a ser adicionado
+ * @return int ID do status recém-inserido
+ */
 public function add_status($data) {
     $pipeline_id = $data['pipeline_id'];
+    // Obtém o nome do pipeline correspondente ao ID fornecido
     $pipeline_name = $this->db->select('name')->from('tblmulti_pipeline_pipelines')->where('id', $pipeline_id)->get()->row()->name;
 
-    $data['pipeline_name'] = $pipeline_name; // Adicionado
+    $data['pipeline_name'] = $pipeline_name; // Adiciona o nome do pipeline aos dados
 
     $this->db->insert('tblmulti_pipeline_stages', $data);
     return $this->db->insert_id();
 }
 
+/**
+ * Obtém os estágios de um pipeline específico para visualização Kanban
+ *
+ * @param int $pipeline_id ID do pipeline
+ * @return array Lista de estágios do pipeline
+ */
 public function get_kanban_pipeline_stages($pipeline_id)
 {
     return $this->db->select('*')->where('pipeline_id', $pipeline_id)->get('tblmulti_pipeline_stages')->result_array();
 }
 
+/**
+ * Obtém os leads de um pipeline específico para visualização Kanban
+ *
+ * @param int $pipeline_id ID do pipeline
+ * @return array Lista de leads do pipeline
+ */
 public function get_kanban_pipeline_leads($pipeline_id)
 {
     return $this->db->where('pipeline_id', $pipeline_id)->get('tblleads')->result_array();
 }
 
+/**
+ * Atualiza o estágio de um lead no Kanban
+ *
+ * @param int $lead_id ID do lead
+ * @param int $stage_id ID do novo estágio
+ * @return bool Resultado da operação de atualização
+ */
 public function update_kanban_lead_stage($lead_id, $stage_id)
 {
     return $this->db->where('id', $lead_id)->update('tblleads', ['stage_id' => $stage_id]);
 }
 
+/**
+ * Obtém os estágios de um pipeline específico ou todos os estágios
+ *
+ * @param int|null $pipeline_id ID do pipeline (opcional)
+ * @return array Lista de estágios
+ */
 public function get_stages($pipeline_id = null)
 {
     $this->db->select('*');
@@ -325,6 +402,12 @@ public function get_stages($pipeline_id = null)
     return $this->db->get()->result_array();
 }
 
+/**
+ * Obtém leads com base em condições específicas
+ *
+ * @param array $where Condições para filtrar os leads (opcional)
+ * @return array Lista de leads que atendem às condições
+ */
 public function get_leads($where = [])
 {
     $this->db->select('*');
@@ -337,6 +420,11 @@ public function get_leads($where = [])
     return $this->db->get()->result_array();
 }
 
+/**
+ * Obtém leads agrupados por pipeline e estágio
+ *
+ * @return array Leads agrupados por pipeline e estágio
+ */
 public function get_leads_grouped()
 {
     $this->db->select('tblleads.*, tblmulti_pipeline_stages.name as stage_name, tblmulti_pipeline_stages.color as stage_color, tblmulti_pipeline_pipelines.id as pipeline_id, tblmulti_pipeline_pipelines.name as pipeline_name');
@@ -366,6 +454,11 @@ public function get_leads_grouped()
     return $grouped_leads;
 }
 
+/**
+ * Obtém todos os estágios com informações do pipeline
+ *
+ * @return array Lista de todos os estágios com informações do pipeline
+ */
 public function get_all_stages()
 {
     $this->db->select('tblmulti_pipeline_stages.*, tblmulti_pipelines.name as pipeline_name');
@@ -373,6 +466,12 @@ public function get_all_stages()
     return $this->db->get('tblmulti_pipeline_stages')->result_array();
 }
 
+/**
+ * Obtém os estágios de um pipeline específico
+ *
+ * @param int $pipeline_id ID do pipeline
+ * @return array Lista de estágios do pipeline ordenados por ordem ascendente
+ */
 public function get_stages_by_pipeline($pipeline_id)
 {
     $this->db->select('id, name');
@@ -411,38 +510,70 @@ public function add_lead($data)
         'country'       => $data['country'],
         'zip'           => $data['zip'],
         'description'   => $data['description'],
-        'dateadded'     => date('Y-m-d H:i:s'),
+        'dateadded'     => date('Y-m-d H:i:s'), // Data e hora atual
     ];
 
     // Inserir os dados na tabela tblleads
     $this->db->insert('tblleads', $insert_data);
+
+    // Retorna o ID do lead inserido se a inserção foi bem-sucedida, caso contrário retorna false
     return ($this->db->affected_rows() > 0) ? $this->db->insert_id() : false;
 }
 
+/**
+ * Obtém um pipeline específico pelo ID
+ *
+ * @param int $id ID do pipeline
+ * @return array Dados do pipeline
+ */
 public function get_pipeline($id)
 {
     $this->db->where('id', $id);
     return $this->db->get('tblmulti_pipeline_pipelines')->row_array();
 }
 
+/**
+ * Atualiza um status (estágio) do pipeline
+ *
+ * @param int $id ID do status
+ * @param array $data Dados a serem atualizados
+ * @return bool Resultado da atualização
+ */
 public function update_status($id, $data)
 {
     $this->db->where('id', $id);
     return $this->db->update('tblmulti_pipeline_stages', $data);
 }
 
+/**
+ * Obtém um status (estágio) específico pelo ID
+ *
+ * @param int $id ID do status
+ * @return array Dados do status
+ */
 public function get_status($id)
 {
     $this->db->where('id', $id);
     return $this->db->get('tblmulti_pipeline_stages')->row_array();
 }
 
+/**
+ * Exclui um status (estágio) do pipeline
+ *
+ * @param int $id ID do status a ser excluído
+ * @return bool Resultado da exclusão
+ */
 public function delete_status($id)
 {
     $this->db->where('id', $id);
     return $this->db->delete('tblmulti_pipeline_stages');
 }
 
+/**
+ * Obtém todos os status (estágios) com contagem de leads e nome do pipeline
+ *
+ * @return array Lista de status com contagem de leads e nome do pipeline
+ */
 public function get_all_statuses_with_lead_count()
 {
     $this->db->select('tblmulti_pipeline_stages.*, tblmulti_pipeline_pipelines.name as pipeline_name, COUNT(tblleads.id) as lead_count');
@@ -454,6 +585,11 @@ public function get_all_statuses_with_lead_count()
     return $this->db->get()->result_array();
 }
 
+/**
+ * Obtém todos os pipelines com contagem de leads
+ *
+ * @return array Lista de pipelines com contagem de leads
+ */
 public function get_pipelines_with_lead_count()
 {
     $this->db->select('p.*, COUNT(l.id) as lead_count');
@@ -463,6 +599,11 @@ public function get_pipelines_with_lead_count()
     return $this->db->get()->result_array();
 }
 
+/**
+ * Obtém todos os leads com informações de pipeline e estágio
+ *
+ * @return array Lista de todos os leads com detalhes de pipeline e estágio
+ */
 public function get_all_leads()
 {
     $this->db->select('tblleads.*, tblmulti_pipeline_pipelines.name as pipeline_name, tblmulti_pipeline_stages.name as stage_name');
@@ -472,6 +613,11 @@ public function get_all_leads()
     return $this->db->get()->result_array();
 }
 
+/**
+ * Obtém todos os pipelines com seus estágios e contagem de leads
+ *
+ * @return array Lista de pipelines com estágios e contagem de leads
+ */
 public function get_pipelines_with_stages_and_lead_count()
 {
     $pipelines = $this->get_pipelines();
@@ -482,6 +628,14 @@ public function get_pipelines_with_stages_and_lead_count()
     return $pipelines;
 }
 
+/**
+ * Atualiza o pipeline e o estágio de um lead
+ *
+ * @param int $lead_id ID do lead
+ * @param int $pipeline_id ID do novo pipeline
+ * @param int $stage_id ID do novo estágio
+ * @return bool Verdadeiro se atualizado com sucesso, falso caso contrário
+ */
 public function update_lead_pipeline_stage($lead_id, $pipeline_id, $stage_id)
 {
     $this->db->where('id', $lead_id);
@@ -496,7 +650,7 @@ public function update_lead_pipeline_stage($lead_id, $pipeline_id, $stage_id)
     /**
      * Adiciona uma nova associação de formulário
      * 
-     * @param array $data
+     * @param array $data Dados da associação a ser inserida
      * @return int|bool ID da associação inserida ou false em falha
      */
     public function add_form_association($data)
@@ -506,11 +660,11 @@ public function update_lead_pipeline_stage($lead_id, $pipeline_id, $stage_id)
     }
 
     /**
-     * Atualiza uma associação de formulário
+     * Atualiza uma associação de formulário existente
      * 
-     * @param int $id
-     * @param array $data
-     * @return bool
+     * @param int $id ID da associação a ser atualizada
+     * @param array $data Novos dados da associação
+     * @return bool Verdadeiro se atualizado com sucesso, falso caso contrário
      */
     public function update_form_association($id, $data)
     {
@@ -522,8 +676,8 @@ public function update_lead_pipeline_stage($lead_id, $pipeline_id, $stage_id)
     /**
      * Exclui uma associação de formulário
      * 
-     * @param int $id
-     * @return bool
+     * @param int $id ID da associação a ser excluída
+     * @return bool Verdadeiro se excluído com sucesso, falso caso contrário
      */
     public function delete_form_association($id)
     {
@@ -533,9 +687,9 @@ public function update_lead_pipeline_stage($lead_id, $pipeline_id, $stage_id)
     }
 
     /**
-     * Obtém as associações de formulários
+     * Obtém as associações de formulários com informações relacionadas
      *
-     * @return array
+     * @return array Lista de associações de formulários com detalhes de formulário, pipeline e estágio
      */
     public function get_form_associations()
     {
@@ -550,7 +704,7 @@ public function update_lead_pipeline_stage($lead_id, $pipeline_id, $stage_id)
     /**
      * Obtém os pipelines com seus estágios
      *
-     * @return array
+     * @return array Lista de pipelines com seus respectivos estágios
      */
     public function get_pipelines_with_stages()
     {
