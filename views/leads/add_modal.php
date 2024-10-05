@@ -41,7 +41,7 @@
                                         echo '<optgroup label="' . htmlspecialchars($pipeline['name']) . '">';
                                         $stages = $this->db->get_where('tblmulti_pipeline_stages', ['pipeline_id' => $pipeline['id']])->result_array();
                                         foreach ($stages as $stage) {
-                                            echo '<option value="' . $stage['id'] . '" data-pipeline-id="' . $pipeline['id'] . '">' . htmlspecialchars($stage['name']) . '</option>';
+                                            echo '<option value="' . $pipeline['id'] . ',' . $stage['id'] . '">' . htmlspecialchars($stage['name']) . '</option>';
                                         }
                                         echo '</optgroup>';
                                     }
@@ -167,9 +167,9 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Campos Ocultos Inseridos Aqui Dentro -->
-                    <input type="hidden" id="pipeline_id" name="pipeline_id" value="">
-                    <input type="hidden" id="stage_id" name="stage_id" value="">
+                    <!-- Campos Ocultos Inseridos Dentro do Formulário -->
+                    <input type="hidden" id="pipeline_id" name="pipeline_id" value="0">
+                    <input type="hidden" id="stage_id" name="stage_id" value="0">
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
                         <button type="submit" class="btn btn-info">Adicionar Lead</button>
@@ -181,51 +181,46 @@
 </div>
 
 <!-- Script JavaScript Corrigido -->
+<!-- Adicione este código ao final do arquivo add_modal.php -->
 <script>
-$(document).ready(function() {
-    // Inicializar select2 para campos de seleção
-    $('.selectpicker').select2({
-        theme: 'bootstrap'
-    });
+    $(document).ready(function() {
+        // Manipulador único de mudança para pipeline_stage
+        $('#pipeline_stage').change(function() {
+            var selectedValue = $(this).val(); // Formato esperado: "pipeline_id,stage_id"
+            console.log("Valor selecionado:", selectedValue);
 
-    // Inicializar tagsinput para o campo de tags
-    $('#tags').tagsinput({
-        tagClass: 'label label-info'
-    });
+            if (selectedValue) {
+                var ids = selectedValue.split(',');
+                if(ids.length === 2){
+                    var pipelineId = parseInt(ids[0]);
+                    var stageId = parseInt(ids[1]);
 
-    // Único manipulador de mudança para pipeline_stage
-    $('#pipeline_stage').change(function() {
-        var selectedStage = $(this).val(); // stage_id
-        var pipelineId = $(this).find('option:selected').data('pipeline-id'); // pipeline_id
-        $('#pipeline_id').val(pipelineId);
-        $('#stage_id').val(selectedStage);
-    });
+                    console.log("Pipeline ID:", pipelineId);
+                    console.log("Stage ID:", stageId);
 
-    // Submeter o formulário via AJAX
-    $('form').on('submit', function(e) {
-        e.preventDefault();
-        $.ajax({
-            url: $(this).attr('action'),
-            method: 'POST',
-            data: $(this).serialize(),
-            dataType: 'json',
-            headers: {
-                'X-CSRF-Token': $('input[name="<?php echo $this->security->get_csrf_token_name(); ?>"]').val(),
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert_float('success', 'Lead adicionado com sucesso!');
-                    $('#addLeadModal').modal('hide');
-                    // Recarregar a página ou atualizar a lista de leads
+                    // Verificar se parseInt retornou números válidos
+                    if(!isNaN(pipelineId) && !isNaN(stageId)){
+                        $('#pipeline_id').val(pipelineId);
+                        $('#stage_id').val(stageId);
+
+                        console.log("Hidden pipeline_id:", $('#pipeline_id').val());
+                        console.log("Hidden stage_id:", $('#stage_id').val());
+                    } else {
+                        console.error("Erro: Valores de pipeline_id ou stage_id inválidos.");
+                        $('#pipeline_id').val('');
+                        $('#stage_id').val('');
+                    }
                 } else {
-                    alert_float('danger', response.message || 'Erro ao adicionar lead. Por favor, tente novamente.');
+                    console.error("Erro: O valor selecionado não está no formato esperado 'pipeline_id,stage_id'.");
+                    $('#pipeline_id').val('');
+                    $('#stage_id').val('');
                 }
-            },
-            error: function(xhr, status, error) {
-                alert_float('danger', 'Erro ao processar a requisição. Por favor, tente novamente.');
+            } else {
+                // Se nenhuma opção for selecionada, limpar os campos ocultos
+                $('#pipeline_id').val('');
+                $('#stage_id').val('');
+                console.log("Pipeline e Stage IDs foram limpos.");
             }
         });
     });
-});
 </script>
