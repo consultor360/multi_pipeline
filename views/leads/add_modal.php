@@ -27,7 +27,8 @@
                 <h4 class="modal-title" id="addLeadModalLabel">Adicionar novo Lead</h4>
             </div>
             <div class="modal-body">
-                <form action="<?php echo admin_url('multi_pipeline/add_lead'); ?>" method="post">
+            <form action="<?php echo admin_url('multi_pipeline/add_lead'); ?>" method="post">
+                    <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -214,14 +215,21 @@ $(document).ready(function() {
             method: 'POST',
             data: $(this).serialize(),
             dataType: 'json',
+            headers: {
+                'X-CSRF-Token': $('input[name="csrf_token_name"]').val(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             success: function(response) {
                 if (response.success) {
                     alert_float('success', 'Lead adicionado com sucesso!');
                     $('#addLeadModal').modal('hide');
                     // Recarregar a página ou atualizar a lista de leads
                 } else {
-                    alert_float('danger', 'Erro ao adicionar lead. Por favor, tente novamente.');
+                    alert_float('danger', response.message || 'Erro ao adicionar lead. Por favor, tente novamente.');
                 }
+            },
+            error: function(xhr, status, error) {
+                alert_float('danger', 'Erro ao processar a requisição. Por favor, tente novamente.');
             }
         });
     });
