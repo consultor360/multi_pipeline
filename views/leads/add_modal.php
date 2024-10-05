@@ -96,10 +96,6 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="tags">Tags</label>
-                                <input type="text" name="tags" id="tags" class="form-control" data-role="tagsinput">
-                            </div>
-                            <div class="form-group">
                                 <label for="name">Nome *</label>
                                 <input type="text" name="name" id="name" class="form-control" required>
                             </div>
@@ -108,8 +104,8 @@
                                 <input type="text" name="title" id="title" class="form-control">
                             </div>
                             <div class="form-group">
-                                <label for="email">Endereço de E-mail</label>
-                                <input type="email" name="email" id="email" class="form-control">
+                                <label for="email">Endereço de E-mail *</label>
+                                <input type="email" name="email" id="email" class="form-control" required>
                             </div>
                         </div>
                     </div>
@@ -149,7 +145,7 @@
                                 <label for="country">País</label>
                                 <select name="country" id="country" class="form-control selectpicker" data-live-search="true">
                                     <?php foreach (get_all_countries() as $country) { ?>
-                                        <option value="<?php echo $country['country_id']; ?>"<?php if($country['country_id'] == 30) echo ' selected'; ?>><?php echo $country['short_name']; ?></option>
+                                        <option value="<?php echo $country['country_id']; ?>"<?php if($country['country_id'] == 236) echo ' selected'; ?>><?php echo $country['short_name']; ?></option>
                                     <?php } ?>
                                 </select>
                             </div>
