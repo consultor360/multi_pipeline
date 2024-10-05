@@ -490,55 +490,55 @@ public function add_modal($pipeline_id = null, $stage_id = null)
     }
 
     public function add_lead()
-    {
-        if ($this->input->post()) {
-            $data = $this->input->post();
+{
+    if ($this->input->post()) {
+        $data = $this->input->post();
 
-            // Validar dados de entrada
-            $this->load->library('form_validation');
-            $this->form_validation->set_rules('name', 'Nome', 'required|trim');
-            $this->form_validation->set_rules('email', 'Email', 'required|valid_email|trim');
-            $this->form_validation->set_rules('pipeline_id', 'Pipeline');
-            $this->form_validation->set_rules('stage_id', 'Estágio');
-            $this->form_validation->set_rules('status', 'Status', 'required');
-            $this->form_validation->set_rules('source', 'Fonte', 'required');
+        // Validar dados de entrada
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('name', 'Nome', 'required|trim');
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|trim');
+        $this->form_validation->set_rules('pipeline_id', 'Pipeline', 'required');
+        $this->form_validation->set_rules('stage_id', 'Estágio', 'required');
+        $this->form_validation->set_rules('status', 'Status', 'required');
+        $this->form_validation->set_rules('source', 'Fonte', 'required');
 
-            if ($this->form_validation->run() === FALSE) {
-                echo json_encode(['success' => false, 'message' => validation_errors()]);
-                return;
-            }
-
-            // Verificar se o lead já existe
-            $this->load->model('Lead_model');
-            $existing_lead = $this->Lead_model->get_lead_by_email($data['email']);
-            if ($existing_lead) {
-                echo json_encode(['success' => false, 'message' => 'Um lead com este email já existe.']);
-                return;
-            }
-
-            // Tentar salvar o lead
-            try {
-                $lead_id = $this->Lead_model->add_lead($data);
-                if ($lead_id) {
-                    echo json_encode(['success' => true, 'message' => 'Lead adicionado com sucesso!', 'lead_id' => $lead_id]);
-                } else {
-                    echo json_encode(['success' => false, 'message' => 'Erro ao adicionar lead.']);
-                }
-            } catch (Exception $e) {
-                log_message('error', 'Erro ao adicionar lead: ' . $e->getMessage());
-                echo json_encode(['success' => false, 'message' => 'Erro interno ao adicionar lead.']);
-            }
+        if ($this->form_validation->run() === FALSE) {
+            echo json_encode(['success' => false, 'message' => validation_errors()]);
             return;
         }
 
-        // Carregar dados necessários para a view
-        $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines();
-        $data['stages'] = $this->Multi_pipeline_model->get_stages();
-        $data['statuses'] = $this->Lead_model->get_status();
-        $data['sources'] = $this->Lead_model->get_sources();
-        $data['staff'] = $this->Lead_model->get_staff();
-        $data['title'] = _l('add_new_lead');
+        // Verificar se o lead já existe
+        $this->load->model('Lead_model');
+        $existing_lead = $this->Lead_model->get_lead_by_email($data['email']);
+        if ($existing_lead) {
+            echo json_encode(['success' => false, 'message' => 'Um lead com este email já existe.']);
+            return;
+        }
 
-        $this->load->view('modules/multi_pipeline/views/leads/add_modal', $data);
+        // Tentar salvar o lead
+        try {
+            $lead_id = $this->Lead_model->add_lead($data);
+            if ($lead_id) {
+                echo json_encode(['success' => true, 'message' => 'Lead adicionado com sucesso!', 'lead_id' => $lead_id]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Erro ao adicionar lead.']);
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Erro ao adicionar lead: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro interno ao adicionar lead.']);
+        }
+        return;
     }
+
+    // Carregar dados necessários para a view
+    $data['pipelines'] = $this->Multi_pipeline_model->get_pipelines();
+    $data['stages'] = $this->Multi_pipeline_model->get_stages();
+    $data['statuses'] = $this->Lead_model->get_status();
+    $data['sources'] = $this->Lead_model->get_sources();
+    $data['staff'] = $this->Lead_model->get_staff();
+    $data['title'] = _l('add_new_lead');
+
+    $this->load->view('modules/multi_pipeline/views/leads/add_modal', $data);
+}
 }
