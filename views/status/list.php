@@ -8,12 +8,22 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
             <div class="col-md-12">
                 <div class="panel_s">
                     <div class="panel-body">
-                        <h4 class="no-margin"><?php echo _l('lead_statuses'); ?></h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="no-margin"><?php echo _l('lead_statuses'); ?></h4>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="<?php echo admin_url('multi_pipeline/status/create'); ?>" class="btn btn-info pull-right">
+                                    <i class="fa fa-plus"></i> <?php echo _l('create_lead_status'); ?>
+                                </a>
+                            </div>
+                        </div>
                         <hr class="hr-panel-heading" />
                         <div class="table-responsive">
                             <table class="table dt-table">
                                 <thead>
                                     <tr>
+                                        <th><?php echo _l('id'); ?></th>
                                         <th><?php echo _l('lead_status_name'); ?></th>
                                         <th><?php echo _l('pipeline_name'); ?></th>
                                         <th><?php echo _l('lead_count'); ?></th>
@@ -24,6 +34,7 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                 <tbody>
                                     <?php foreach($statuses as $status): ?>
                                     <tr>
+                                         <td><?php echo $status['id']; ?></td>
                                         <td><?php echo $status['name']; ?></td>
                                         <td><?php echo $status['pipeline_name']; ?></td>
                                         <td><?php echo $status['lead_count']; ?></td>
