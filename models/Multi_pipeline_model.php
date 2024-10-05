@@ -487,38 +487,7 @@ public function get_stages_by_pipeline($pipeline_id)
  * @param array $data Dados do lead
  * @return int|bool ID do lead inserido ou false em falha
  */
-public function add_lead($data)
-{
-    // Preparar os dados para inserção
-    $insert_data = [
-        'pipeline_id'   => $data['pipeline_id'],
-        'stage_id'      => $data['stage_id'],
-        'status'        => $data['status'],
-        'source'        => $data['source'],
-        'assigned'      => !empty($data['assigned']) ? $data['assigned'] : null,
-        'name'          => $data['name'],
-        'title'         => $data['title'],
-        'email'         => $data['email'],
-        'tags'          => $data['tags'],
-        'website'       => $data['website'],
-        'phonenumber'   => $data['phonenumber'],
-        'lead_value'    => $data['lead_value'],
-        'company'       => $data['company'],
-        'address'       => $data['address'],
-        'city'          => $data['city'],
-        'state'         => $data['state'],
-        'country'       => $data['country'],
-        'zip'           => $data['zip'],
-        'description'   => $data['description'],
-        'dateadded'     => date('Y-m-d H:i:s'), // Data e hora atual
-    ];
 
-    // Inserir os dados na tabela tblleads
-    $this->db->insert('tblleads', $insert_data);
-
-    // Retorna o ID do lead inserido se a inserção foi bem-sucedida, caso contrário retorna false
-    return ($this->db->affected_rows() > 0) ? $this->db->insert_id() : false;
-}
 
 /**
  * Obtém um pipeline específico pelo ID

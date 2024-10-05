@@ -82,33 +82,47 @@ class Lead_model extends App_Model
      */
     public function add_lead($data)
     {
-        // Prepara os dados do lead para inserção
-        $lead_data = array(
+        // Verificar se o lead já existe
+        $existing_lead = $this->db->get_where('tblleads', ['email' => $data['email']])->row();
+        if ($existing_lead) {
+            return ['error' => true, 'message' => 'Um lead com este email já existe.'];
+        }
+
+        // Preparar os dados para inserção
+        $insert_data = [
+            'pipeline_id'   => $data['pipeline_id'],
+            'stage_id'      => $data['stage_id'],
+            'status'        => $data['status'],
+            'source'        => $data['source'],
+            'assigned'      => !empty($data['assigned']) ? $data['assigned'] : null,
             'name'          => $data['name'],
-            'email'         => $data['email'],
-            'phonenumber'   => $data['phonenumber'],
-            'company'       => $data['company'],
             'title'         => isset($data['title']) ? $data['title'] : null,
+            'email'         => $data['email'],
             'website'       => isset($data['website']) ? $data['website'] : null,
+            'phonenumber'   => isset($data['phonenumber']) ? $data['phonenumber'] : null,
+            'lead_value'    => isset($data['lead_value']) ? $data['lead_value'] : null,
+            'company'       => isset($data['company']) ? $data['company'] : null,
             'address'       => isset($data['address']) ? $data['address'] : null,
             'city'          => isset($data['city']) ? $data['city'] : null,
             'state'         => isset($data['state']) ? $data['state'] : null,
             'country'       => isset($data['country']) ? $data['country'] : null,
             'zip'           => isset($data['zip']) ? $data['zip'] : null,
             'description'   => isset($data['description']) ? $data['description'] : null,
-            'tags'          => isset($data['tags']) ? $data['tags'] : null,
-            'source'        => isset($data['source']) ? $data['source'] : null,
-            'status'        => isset($data['status']) ? $data['status'] : null,
-            'assigned'      => isset($data['assigned']) ? $data['assigned'] : null,
-            'pipeline_id'   => isset($data['lead_pipeline_id']) ? $data['lead_pipeline_id'] : null,
-            'stage_id'      => isset($data['lead_stage_id']) ? $data['lead_stage_id'] : null,
-            'lead_value'    => isset($data['lead_value']) ? $data['lead_value'] : null,
-            'dateadded'     => date('Y-m-d H:i:s') // Adiciona a data atual
-        );
+            'dateadded'     => date('Y-m-d H:i:s'),
+        ];
 
-        // Insere o lead na tabela
-        $this->db->insert('tblleads', $lead_data);
-        return ($this->db->affected_rows() > 0) ? $this->db->insert_id() : false;
+        // Inserir os dados na tabela tblleads
+        try {
+            $this->db->insert('tblleads', $insert_data);
+            if ($this->db->affected_rows() > 0) {
+                return $this->db->insert_id();
+            } else {
+                return ['error' => true, 'message' => 'Falha ao inserir o lead.'];
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Erro ao adicionar lead: ' . $e->getMessage());
+            return ['error' => true, 'message' => 'Erro interno ao adicionar lead.'];
+        }
     }
 
     /**
@@ -139,5 +153,18 @@ class Lead_model extends App_Model
     public function get_staff()
     {
         return $this->db->get_staff('tblstaff')->result_array();
+    }
+
+    /**
+     * Obtém um lead por email
+     *
+     * @param string $email Email do lead
+     * @return object|bool Lead encontrado ou false em caso de erro
+     */
+    public function get_lead_by_email($email)
+    {
+        $this->db->where('email', $email);
+        $query = $this->db->get('tblleads');
+        return $query->row();
     }
 }
