@@ -9,12 +9,22 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
             <div class="col-md-12">
                 <div class="panel_s">
                     <div class="panel-body">
-                        <h4 class="no-margin"><?php echo _l('pipelines_list'); ?></h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="no-margin"><?php echo _l('pipelines_list'); ?></h4>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="<?php echo admin_url('multi_pipeline/create_pipeline'); ?>" class="btn btn-info pull-right">
+                                    <i class="fa fa-plus"></i> <?php echo _l('create_pipeline'); ?>
+                                </a>
+                            </div>
+                        </div>
                         <hr class="hr-panel-heading" />
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
+                                        <th><?php echo _l('id'); ?></th>
                                         <th><?php echo _l('pipeline_name'); ?></th>
                                         <th><?php echo _l('leads_count'); ?></th>
                                         <th><?php echo _l('actions'); ?></th>
@@ -23,6 +33,7 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                 <tbody>
                                     <?php foreach($pipelines as $pipeline): ?>
                                     <tr>
+                                        <td><?php echo $pipeline->id; ?></td>
                                         <td><?php echo $pipeline->name; ?></td>
                                         <td>
                                             <?php
