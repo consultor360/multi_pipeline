@@ -27,7 +27,7 @@
                 <h4 class="modal-title" id="addLeadModalLabel">Adicionar novo Lead</h4>
             </div>
             <div class="modal-body">
-            <form action="<?php echo admin_url('multi_pipeline/add_lead'); ?>" method="post">
+                <form action="<?php echo admin_url('multi_pipeline/add_lead'); ?>" method="post">
                     <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
                     <div class="row">
                         <div class="col-md-6">
@@ -58,42 +58,42 @@
                                 </select>
                             </div>
 
-                    
                             <div class="form-group">
-    <label for="source">Fonte</label>
-    <select name="source" id="source" class="form-control selectpicker" data-live-search="true" required>
-        <?php
-        $sources = $this->db->get('tblleads_sources')->result_array();
-        if (!empty($sources)) {
-            foreach ($sources as $source) {
-                ?>
-                <option value="<?php echo $source['id']; ?>"><?php echo $source['name']; ?></option>
-                <?php
-            }
-        } else {
-            ?>
-            <option value="">Nenhuma fonte encontrada</option>
-            <?php
-        }
-        ?>
-    </select>
-</div>
-<div class="form-group">
-    <label for="assigned">Atribuído a</label>
-    <select name="assigned" id="assigned" class="form-control selectpicker" data-live-search="true">
-        <option value="">Nenhum</option>
-        <?php
-        $staff = $this->db->get('tblstaff')->result_array();
-        if (!empty($staff)) {
-            foreach ($staff as $member) {
-                ?>
-                <option value="<?php echo $member['staffid']; ?>"><?php echo $member['firstname'] . ' ' . $member['lastname']; ?></option>
-                <?php
-            }
-        }
-        ?>
-    </select>
-</div>
+                                <label for="source">Fonte</label>
+                                <select name="source" id="source" class="form-control selectpicker" data-live-search="true" required>
+                                    <?php
+                                    $sources = $this->db->get('tblleads_sources')->result_array();
+                                    if (!empty($sources)) {
+                                        foreach ($sources as $source) {
+                                            ?>
+                                            <option value="<?php echo $source['id']; ?>"><?php echo $source['name']; ?></option>
+                                            <?php
+                                        }
+                                    } else {
+                                        ?>
+                                        <option value="">Nenhuma fonte encontrada</option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="assigned">Atribuído a</label>
+                                <select name="assigned" id="assigned" class="form-control selectpicker" data-live-search="true">
+                                    <option value="">Nenhum</option>
+                                    <?php
+                                    $staff = $this->db->get('tblstaff')->result_array();
+                                    if (!empty($staff)) {
+                                        foreach ($staff as $member) {
+                                            ?>
+                                            <option value="<?php echo $member['staffid']; ?>"><?php echo $member['firstname'] . ' ' . $member['lastname']; ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="tags">Tags</label>
@@ -167,6 +167,9 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Campos Ocultos Inseridos Aqui Dentro -->
+                    <input type="hidden" id="pipeline_id" name="pipeline_id" value="">
+                    <input type="hidden" id="stage_id" name="stage_id" value="">
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
                         <button type="submit" class="btn btn-info">Adicionar Lead</button>
@@ -177,6 +180,7 @@
     </div>
 </div>
 
+<!-- Script JavaScript Corrigido -->
 <script>
 $(document).ready(function() {
     // Inicializar select2 para campos de seleção
@@ -189,22 +193,12 @@ $(document).ready(function() {
         tagClass: 'label label-info'
     });
 
-    // Carregar estágios baseados no pipeline selecionado
-    $('#pipeline').change(function() {
-        var pipelineId = $(this).val();
-        $.ajax({
-            url: admin_url + 'multi_pipeline/get_stages_by_pipeline',
-            method: 'POST',
-            data: {pipeline_id: pipelineId},
-            dataType: 'json',
-            success: function(response) {
-                var options = '';
-                $.each(response, function(key, value) {
-                    options += '<option value="' + value.id + '">' + value.name + '</option>';
-                });
-                $('#status').html(options).selectpicker('refresh');
-            }
-        });
+    // Único manipulador de mudança para pipeline_stage
+    $('#pipeline_stage').change(function() {
+        var selectedStage = $(this).val(); // stage_id
+        var pipelineId = $(this).find('option:selected').data('pipeline-id'); // pipeline_id
+        $('#pipeline_id').val(pipelineId);
+        $('#stage_id').val(selectedStage);
     });
 
     // Submeter o formulário via AJAX
@@ -216,7 +210,7 @@ $(document).ready(function() {
             data: $(this).serialize(),
             dataType: 'json',
             headers: {
-                'X-CSRF-Token': $('input[name="csrf_token_name"]').val(),
+                'X-CSRF-Token': $('input[name="<?php echo $this->security->get_csrf_token_name(); ?>"]').val(),
                 'X-Requested-With': 'XMLHttpRequest'
             },
             success: function(response) {
@@ -233,15 +227,5 @@ $(document).ready(function() {
             }
         });
     });
-
-    $('#pipeline_stage').change(function() {
-        var selectedStage = $(this).val();
-        var pipelineId = $(this).find('option:selected').data('pipeline-id');
-        $('#lead_pipeline_id').val(pipelineId);
-        $('#lead_stage_id').val(selectedStage);
-    });
 });
 </script>
-
-<input type="hidden" id="lead_pipeline_id" name="lead_pipeline_id" value="">
-<input type="hidden" id="lead_stage_id" name="lead_stage_id" value="">
