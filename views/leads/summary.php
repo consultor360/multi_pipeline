@@ -60,6 +60,7 @@
                                     <td><?php echo $lead['phonenumber']; ?></td>
                                     <td>
                                         <select onchange="change_lead_pipeline_stage(this.value, <?php echo $lead['id']; ?>)">
+                                            <option value="null" <?php echo (is_null($lead['pipeline_id']) || $lead['pipeline_id'] == 0 || is_null($lead['stage_id']) || $lead['stage_id'] == 0) ? 'selected' : ''; ?>>Null</option>
                                             <?php foreach($pipelines as $pipeline){ ?>
                                                 <optgroup label="<?php echo $pipeline['name']; ?>">
                                                     <?php foreach($pipeline['stages'] as $stage){ ?>
@@ -86,14 +87,25 @@
 <?php init_tail(); ?>
 <script>
 function change_lead_pipeline_stage(value, lead_id) {
-    var [pipeline_id, stage_id] = value.split(',');
-    $.post(admin_url + 'multi_pipeline/change_lead_pipeline_stage', {
-        pipeline_id: pipeline_id,
-        stage_id: stage_id,
-        lead_id: lead_id
-    }).done(function(response) {
-        // Atualizar a UI conforme necessário
-    });
+    if (value === 'null') {
+        // Tratar a opção "Null"
+        $.post(admin_url + 'multi_pipeline/change_lead_pipeline_stage', {
+            pipeline_id: null,
+            stage_id: null,
+            lead_id: lead_id
+        }).done(function(response) {
+            // Atualizar a UI conforme necessário
+        });
+    } else {
+        var [pipeline_id, stage_id] = value.split(',');
+        $.post(admin_url + 'multi_pipeline/change_lead_pipeline_stage', {
+            pipeline_id: pipeline_id,
+            stage_id: stage_id,
+            lead_id: lead_id
+        }).done(function(response) {
+            // Atualizar a UI conforme necessário
+        });
+    }
 }
 
 $(function() {
