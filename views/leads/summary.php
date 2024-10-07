@@ -13,9 +13,11 @@
                         
                         <div class="row">
                             <div class="col-md-12">
+                                <!--
                                 <a href="#" class="btn btn-info pull-left display-block" data-toggle="modal" data-target="#addLeadModal">
                                     <?php echo _l('new_lead'); ?>
                                 </a>
+                                -->
                                 <?php if(has_permission('leads','','create')){ ?>
                                 <a href="<?php echo admin_url('leads/import'); ?>" class="btn btn-info pull-left display-block mleft5">
                                     <?php echo _l('import_leads'); ?>
