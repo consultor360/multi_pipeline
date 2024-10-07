@@ -27,7 +27,7 @@
                 <h4 class="modal-title" id="addLeadModalLabel">Adicionar novo Lead</h4>
             </div>
             <div class="modal-body">
-                <form action="<?php echo admin_url('multi_pipeline/'); ?>" method="post">
+                <form action="<?php echo admin_url('multi_pipeline/add_lead'); ?>" method="post">
                     <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
                     <div class="row">
                         <div class="col-md-6">
@@ -182,7 +182,7 @@
     $(document).ready(function() {
         // Manipulador único de mudança para pipeline_stage
         $('#pipeline_stage').change(function() {
-            var selectedValue = $(this).val(); // Formato esperado: "pipeline_id,stage_id"
+            var selectedValue = $(this).val();
             console.log("Valor selecionado:", selectedValue);
 
             if (selectedValue) {
@@ -191,16 +191,9 @@
                     var pipelineId = parseInt(ids[0]);
                     var stageId = parseInt(ids[1]);
 
-                    console.log("Pipeline ID:", pipelineId);
-                    console.log("Stage ID:", stageId);
-
-                    // Verificar se parseInt retornou números válidos
                     if(!isNaN(pipelineId) && !isNaN(stageId)){
                         $('#pipeline_id').val(pipelineId);
                         $('#stage_id').val(stageId);
-
-                        console.log("Hidden pipeline_id:", $('#pipeline_id').val());
-                        console.log("Hidden stage_id:", $('#stage_id').val());
                     } else {
                         console.error("Erro: Valores de pipeline_id ou stage_id inválidos.");
                         $('#pipeline_id').val('');
@@ -212,11 +205,32 @@
                     $('#stage_id').val('');
                 }
             } else {
-                // Se nenhuma opção for selecionada, limpar os campos ocultos
                 $('#pipeline_id').val('');
                 $('#stage_id').val('');
-                console.log("Pipeline e Stage IDs foram limpos.");
             }
+        });
+
+        // Manipulador de envio do formulário
+        $('form').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: admin_url + 'multi_pipeline/add_lead',
+                method: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert_float('success', response.message);
+                        $('#addLeadModal').modal('hide');
+                        window.location.href = admin_url + 'multi_pipeline';
+                    } else {
+                        alert_float('danger', response.message || 'Erro ao adicionar lead.');
+                    }
+                },
+                error: function() {
+                    alert_float('danger', 'Erro ao adicionar lead. Por favor, tente novamente.');
+                }
+            });
         });
     });
 </script>
