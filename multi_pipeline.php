@@ -101,6 +101,7 @@ function multi_pipeline_init_menu_items() {
             'href'     => admin_url('multi_pipeline/summary'),
             'icon'     => 'fa fa-chart-bar',
         ],
+        /*
         [
             'slug'     => 'multi_pipeline_add_lead',
             'name'     => _l('add_new_lead'),
@@ -113,6 +114,7 @@ function multi_pipeline_init_menu_items() {
             'href'     => admin_url('multi_pipeline/form_associations'),
             'icon'     => 'fa fa-link',
         ],
+        */
         [
             'slug'     => 'create-status',
             'name'     => _l('Create Status'),
