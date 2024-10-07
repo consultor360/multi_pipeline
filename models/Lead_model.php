@@ -167,4 +167,24 @@ class Lead_model extends App_Model
         $query = $this->db->get('tblleads');
         return $query->row();
     }
+
+    public function get_statuses() {
+        // Seleciona as colunas específicas da tabela 'tblleads_status'
+        $this->db->select('id, name, statusorder, color, isdefault');
+        
+        // Define a tabela a ser consultada
+        $this->db->from('tblleads_status');
+        
+        // Executa a consulta no banco de dados
+        $query = $this->db->get();
+        
+        // Verifica se a consulta retornou algum resultado
+        if ($query->num_rows() > 0) {
+            // Retorna os resultados como um array associativo
+            return $query->result_array();
+        } else {
+            // Retorna um array vazio se nenhum registro for encontrado
+            return [];
+        }
+    }
 }
