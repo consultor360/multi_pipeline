@@ -26,6 +26,7 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                     <tr>
                                         <th><?php echo _l('id'); ?></th>
                                         <th><?php echo _l('pipeline_name'); ?></th>
+                                        <th><?php echo _l('description'); ?></th>
                                         <th><?php echo _l('leads_count'); ?></th>
                                         <th><?php echo _l('actions'); ?></th>
                                     </tr>
@@ -35,6 +36,7 @@ defined('BASEPATH') or exit('No direct script access allowed'); ?>
                                     <tr>
                                         <td><?php echo $pipeline->id; ?></td>
                                         <td><?php echo $pipeline->name; ?></td>
+                                        <td><?php echo $pipeline->description; ?></td>
                                         <td>
                                             <?php
                                             $leads_count = $this->db->where('pipeline_id', $pipeline->id)->count_all_results('tblleads');
