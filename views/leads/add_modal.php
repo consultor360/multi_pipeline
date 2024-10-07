@@ -27,7 +27,7 @@
                 <h4 class="modal-title" id="addLeadModalLabel">Adicionar novo Lead</h4>
             </div>
             <div class="modal-body">
-                <form action="<?php echo admin_url('multi_pipeline/add_lead'); ?>" method="post">
+                <form action="<?php echo admin_url('multi_pipeline/'); ?>" method="post">
                     <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
                     <div class="row">
                         <div class="col-md-6">
