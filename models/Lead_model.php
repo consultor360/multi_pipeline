@@ -168,7 +168,7 @@ class Lead_model extends App_Model
         return $query->row();
     }
 
-    public function get_statuses() {
+    public function get_statuses_perfex() {
         // Seleciona as colunas específicas da tabela 'tblleads_status'
         $this->db->select('id, name, statusorder, color, isdefault');
         
