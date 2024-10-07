@@ -54,7 +54,7 @@
                                         </a>
                                         <?php } ?>
                                     </td>
-                                    <td><a href="<?php echo admin_url('leads/index/'.$lead['id']); ?>"><?php echo $lead['name']; ?></a></td>
+                                    <td><a href="#" class="view-lead-details" data-lead-id="<?php echo $lead['id']; ?>"><?php echo $lead['name']; ?></a></td>
                                     <td><?php echo $lead['company']; ?></td>
                                     <td><?php echo $lead['email']; ?></td>
                                     <td><?php echo $lead['phonenumber']; ?></td>
@@ -111,5 +111,12 @@ function change_lead_pipeline_stage(value, lead_id) {
 
 $(function() {
     initDataTable('.table-leads', admin_url + 'multi_pipeline/leads_table');
+});
+
+// Manipulador de clique para visualizar detalhes do lead
+$(document).on('click', '.view-lead-details', function(e) {
+    e.preventDefault();
+    var leadId = $(this).data('lead-id');
+    init_lead(leadId);
 });
 </script>
