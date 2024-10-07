@@ -169,7 +169,7 @@ class Lead_model extends App_Model
     }
 
     public function get_statuses_perfex() {
-        // Seleciona as colunas específicas da tabela 'tblleads_status'
+        // Seleciona as colunas específicas da tabela 'tblleads_status' tabela de status padrão do Perfex CRM
         $this->db->select('id, name, statusorder, color, isdefault');
         
         // Define a tabela a ser consultada
